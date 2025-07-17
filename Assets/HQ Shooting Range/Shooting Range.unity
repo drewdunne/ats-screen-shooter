@@ -2249,7 +2249,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &451440091
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2322,6 +2322,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea426e338a37ba646a353dd6fac64050, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  confirmExitButton: {fileID: 731538764}
+  cancelExitButton: {fileID: 1089718904}
+  appManager: {fileID: 735570364}
 --- !u!1001 &458716108
 PrefabInstance:
   m_ObjectHideFlags: 0
