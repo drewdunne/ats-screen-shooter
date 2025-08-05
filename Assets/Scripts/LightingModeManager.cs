@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Gaia;
@@ -68,12 +69,9 @@ public class LightingModeManager : MonoBehaviour
         // Check for Gaia Scene Lighting
         CheckForGaiaSceneLighting();
         
-        // Restore the persisted lighting mode after scene load
-        if (persistedMode != currentMode)
-        {
-            // Delay the restoration to ensure Gaia is fully initialized
-            StartCoroutine(RestorePersistedMode());
-        }
+        // Always attempt to restore the persisted lighting mode after scene load
+        // Even if modes match, we need to reapply settings for the new scene
+        StartCoroutine(RestorePersistedMode());
     }
     
     private void StoreOriginalLightingSettings()
@@ -92,27 +90,78 @@ public class LightingModeManager : MonoBehaviour
         if (gaiaGlobal != null && gaiaGlobal.SceneProfile != null)
         {
             gaiaSceneProfile = gaiaGlobal.SceneProfile;
+            
+            // If lighting profiles list is empty, try to find and load the lighting profile
+            if (gaiaSceneProfile.m_lightingProfiles == null || gaiaSceneProfile.m_lightingProfiles.Count == 0)
+            {
+                Debug.LogWarning($"[CheckForGaiaSceneLighting] Profiles list is empty! Attempting to load...");
+                
+                // Try to find the Gaia Lighting System Profile asset
+                var lightingProfiles = UnityEngine.Resources.FindObjectsOfTypeAll<GaiaLightingProfile>();
+                GaiaLightingProfile lightingProfile = null;
+                
+                // Look for the main Gaia Lighting System Profile
+                foreach (var profile in lightingProfiles)
+                {
+                    if (profile.name.Contains("Gaia Lighting System Profile"))
+                    {
+                        lightingProfile = profile;
+                        break;
+                    }
+                }
+                
+                // If not found by name, just use the first one found
+                if (lightingProfile == null && lightingProfiles.Length > 0)
+                {
+                    lightingProfile = lightingProfiles[0];
+                }
+                
+                #if UNITY_EDITOR
+                // In editor, try loading from asset database
+                if (lightingProfile == null)
+                {
+                    lightingProfile = UnityEditor.AssetDatabase.LoadAssetAtPath<GaiaLightingProfile>("Assets/Procedural Worlds/Gaia/Lighting/Gaia Lighting System Profile.asset");
+                }
+                #endif
+                
+                if (lightingProfile != null && lightingProfile.m_lightingProfiles != null)
+                {
+                    Debug.Log($"[CheckForGaiaSceneLighting] Found GaiaLightingProfile with {lightingProfile.m_lightingProfiles.Count} profiles");
+                    gaiaSceneProfile.m_lightingProfiles = lightingProfile.m_lightingProfiles;
+                    gaiaSceneProfile.m_masterSkyboxMaterial = lightingProfile.m_masterSkyboxMaterial;
+                }
+                else
+                {
+                    Debug.LogError("[CheckForGaiaSceneLighting] Could not find GaiaLightingProfile asset!");
+                }
+            }
+            
             originalLightingProfileIndex = gaiaSceneProfile.m_selectedLightingProfileValuesIndex;
+            
+            // Reset indices
+            dayProfileIndex = -1;
+            nightProfileIndex = -1;
             
             // Find Day and Night profile indices by name
             for (int i = 0; i < gaiaSceneProfile.m_lightingProfiles.Count; i++)
             {
-                string profileName = gaiaSceneProfile.m_lightingProfiles[i].m_typeOfLighting.ToLower();
-                if (profileName.Contains("day") || profileName.Contains("noon"))
+                var profile = gaiaSceneProfile.m_lightingProfiles[i];
+                if (profile == null) continue;
+                
+                string profileName = profile.m_typeOfLighting;
+                if (!string.IsNullOrEmpty(profileName))
                 {
-                    dayProfileIndex = i;
-                }
-                else if (profileName.Contains("night") || profileName.Contains("midnight"))
-                {
-                    nightProfileIndex = i;
+                    string profileNameLower = profileName.ToLower();
+                    if (profileNameLower.Contains("day") || profileNameLower.Contains("noon"))
+                    {
+                        dayProfileIndex = i;
+                    }
+                    else if (profileNameLower.Contains("night") || profileNameLower.Contains("midnight"))
+                    {
+                        nightProfileIndex = i;
+                    }
                 }
             }
-            
-            Debug.Log($"Gaia Scene Profile found. Current index: {originalLightingProfileIndex}, Day: {dayProfileIndex}, Night: {nightProfileIndex}");
-        }
-        else
-        {
-            Debug.Log("No Gaia Scene Profile found");
         }
     }
     
@@ -137,7 +186,6 @@ public class LightingModeManager : MonoBehaviour
             }
         }
         
-        Debug.Log($"LightingModeManager: Found {sceneLights.Count} scene lights");
     }
     
     public void ToggleLightingMode()
@@ -186,33 +234,57 @@ public class LightingModeManager : MonoBehaviour
         // Force re-check for Gaia since it might have initialized after our Start
         CheckForGaiaSceneLighting();
         
-        // Restore the persisted mode
+        // Wait for Gaia to fully apply its default profile first
+        yield return new WaitForSeconds(0.5f);
+        
+        // Now restore the persisted mode
         SetLightingMode(persistedMode);
         
         // Force a complete skybox refresh if in dark mode
         if (persistedMode == LightingMode.Dark && nightProfileIndex >= 0)
         {
-            yield return new WaitForSeconds(0.2f);
+            yield return new WaitForSeconds(0.5f);
             
-            // Force Gaia to fully reload the profile
-            ForceGaiaProfileReload(nightProfileIndex);
-            
-            yield return new WaitForSeconds(0.1f);
-            
-            // Force apply skybox settings again
-            ApplySkyboxFromProfile(nightProfileIndex);
-            
-            // Also force Unity to refresh the skybox
-            if (RenderSettings.skybox != null)
+            // Force multiple update attempts to ensure skybox is applied
+            for (int i = 0; i < 3; i++)
             {
-                Material skybox = RenderSettings.skybox;
-                RenderSettings.skybox = null;
-                yield return null;
-                RenderSettings.skybox = skybox;
+                // Force Gaia to fully reload the profile
+                ForceGaiaProfileReload(nightProfileIndex);
+                
+                yield return new WaitForSeconds(0.2f);
+                
+                // Force apply skybox settings again
+                ApplySkyboxFromProfile(nightProfileIndex);
+                
+                // Check if skybox was applied correctly
+                if (RenderSettings.skybox != null)
+                {
+                    Material skybox = RenderSettings.skybox;
+                    // Force skybox to update by temporarily setting to null
+                    RenderSettings.skybox = null;
+                    yield return null;
+                    RenderSettings.skybox = skybox;
+                    
+                    // Force the skybox material to refresh its properties
+                    if (skybox.HasProperty("_Exposure"))
+                    {
+                        float currentExposure = skybox.GetFloat("_Exposure");
+                        if (currentExposure != gaiaSceneProfile.m_lightingProfiles[nightProfileIndex].m_skyboxExposure)
+                        {
+                            // Try applying again if it didn't stick
+                            ApplySkyboxFromProfile(nightProfileIndex);
+                        }
+                        else
+                        {
+                            // Success, break out of retry loop
+                            break;
+                        }
+                    }
+                }
+                
+                yield return new WaitForSeconds(0.1f);
             }
         }
-        
-        Debug.Log($"Restored lighting mode to: {persistedMode} with skybox refresh");
     }
     
     private void SetNormalLighting()
@@ -246,15 +318,12 @@ public class LightingModeManager : MonoBehaviour
             // Manually update skybox if needed
             ApplySkyboxFromProfile(targetProfile);
             
-            Debug.Log($"Gaia: Restored lighting profile to index {targetProfile}");
         }
         
         if (flashlightController != null)
         {
             flashlightController.SetFlashlightEnabled(false);
         }
-        
-        Debug.Log("Lighting Mode: Normal");
     }
     
     private void SetDarkLighting()
@@ -272,33 +341,67 @@ public class LightingModeManager : MonoBehaviour
         RenderSettings.ambientIntensity = darkModeAmbientIntensity;
         
         // Set Gaia lighting profile to Night
+        Debug.Log($"[SetDarkLighting] gaiaSceneProfile: {gaiaSceneProfile != null}, nightProfileIndex: {nightProfileIndex}");
         if (gaiaSceneProfile != null && nightProfileIndex >= 0)
         {
-            gaiaSceneProfile.m_selectedLightingProfileValuesIndex = nightProfileIndex;
-            
-            // Force update of Gaia lighting
+            // First check if we need to refresh the Gaia reference
             GaiaGlobal gaiaGlobal = GaiaGlobal.Instance;
-            if (gaiaGlobal != null)
+            if (gaiaGlobal != null && gaiaGlobal.SceneProfile != null)
             {
-                gaiaGlobal.UpdateGaiaTimeOfDay(false);
+                // Re-check for Gaia profiles if needed
+                if (gaiaSceneProfile != gaiaGlobal.SceneProfile)
+                {
+                    CheckForGaiaSceneLighting();
+                }
             }
             
-            // Manually update skybox if needed
-            ApplySkyboxFromProfile(nightProfileIndex);
-            
-            Debug.Log($"Gaia: Set lighting profile to Night (index {nightProfileIndex})");
-        }
-        else if (gaiaSceneProfile != null && nightProfileIndex < 0)
-        {
-            Debug.LogWarning("No Night profile found in Gaia lighting profiles");
+            if (nightProfileIndex >= 0 && gaiaSceneProfile != null)
+            {
+                // Get the night profile
+                GaiaLightingProfileValues nightProfile = gaiaSceneProfile.m_lightingProfiles[nightProfileIndex];
+                
+                gaiaSceneProfile.m_selectedLightingProfileValuesIndex = nightProfileIndex;
+                
+                // Force update of Gaia lighting
+                if (gaiaGlobal != null)
+                {
+                    gaiaGlobal.UpdateGaiaTimeOfDay(false);
+                    
+                    // Try to force time of day update if Gaia supports it
+                    if (gaiaSceneProfile.m_gaiaTimeOfDay != null)
+                    {
+                        // Force night time
+                        gaiaSceneProfile.m_gaiaTimeOfDay.m_todHour = 1;
+                        gaiaSceneProfile.m_gaiaTimeOfDay.m_todMinutes = 0;
+                        gaiaGlobal.UpdateGaiaTimeOfDay(false);
+                    }
+                }
+                
+                // Force reload the profile to ensure it's applied
+                ForceGaiaProfileReload(nightProfileIndex);
+                
+                // Apply skybox properties directly without creating new materials
+                if (nightProfile != null)
+                {
+                    // Apply skybox properties to the existing material
+                    ApplySkyboxFromProfile(nightProfileIndex);
+                    
+                    // Force Unity to refresh the skybox by triggering a small change
+                    if (RenderSettings.skybox != null)
+                    {
+                        // Save reference and force update
+                        Material skybox = RenderSettings.skybox;
+                        RenderSettings.skybox = null;
+                        RenderSettings.skybox = skybox;
+                    }
+                }
+            }
         }
         
         if (flashlightController != null)
         {
             flashlightController.SetFlashlightEnabled(true);
         }
-        
-        Debug.Log("Lighting Mode: Dark (Flashlight Active)");
     }
     
     public LightingMode GetCurrentMode()
@@ -349,32 +452,65 @@ public class LightingModeManager : MonoBehaviour
         Material skyboxMat = RenderSettings.skybox;
         if (skyboxMat != null)
         {
-            // Update common skybox properties
-            if (skyboxMat.HasProperty("_Tint"))
+            // DON'T create a new material with different shader - just modify the existing one
+            // This preserves the PWS/Skybox/PW_HDRI shader that Gaia uses
+            
+            // Check for PWS shader properties (Gaia's custom shader)
+            if (skyboxMat.HasProperty("_HDRITint"))
+            {
+                skyboxMat.SetColor("_HDRITint", profile.m_skyboxTint);
+            }
+            else if (skyboxMat.HasProperty("_Tint"))
+            {
                 skyboxMat.SetColor("_Tint", profile.m_skyboxTint);
-                
-            if (skyboxMat.HasProperty("_Exposure"))
+            }
+            
+            // PWS shader uses _HDRIExposure instead of _Exposure
+            if (skyboxMat.HasProperty("_HDRIExposure"))
+            {
+                skyboxMat.SetFloat("_HDRIExposure", profile.m_skyboxExposure);
+            }
+            else if (skyboxMat.HasProperty("_Exposure"))
+            {
                 skyboxMat.SetFloat("_Exposure", profile.m_skyboxExposure);
+            }
                 
             if (skyboxMat.HasProperty("_Rotation"))
                 skyboxMat.SetFloat("_Rotation", profile.m_skyboxRotationOffset);
                 
-            // For HDRI skyboxes
-            if (skyboxMat.HasProperty("_Tex") && profile.m_skyboxHDRI != null)
-                skyboxMat.SetTexture("_Tex", profile.m_skyboxHDRI);
+            // For HDRI skyboxes - PWS shader uses _MainTex
+            if (profile.m_skyboxHDRI != null)
+            {
+                if (skyboxMat.HasProperty("_MainTex"))
+                {
+                    skyboxMat.SetTexture("_MainTex", profile.m_skyboxHDRI);
+                }
+                else if (skyboxMat.HasProperty("_Tex"))
+                {
+                    skyboxMat.SetTexture("_Tex", profile.m_skyboxHDRI);
+                }
+            }
                 
             // For procedural skyboxes
             if (skyboxMat.HasProperty("_SunSize"))
                 skyboxMat.SetFloat("_SunSize", profile.m_sunSize);
                 
             if (skyboxMat.HasProperty("_AtmosphereThickness"))
+            {
                 skyboxMat.SetFloat("_AtmosphereThickness", profile.m_atmosphereThickness);
+            }
                 
             if (skyboxMat.HasProperty("_SkyTint"))
                 skyboxMat.SetColor("_SkyTint", profile.m_skyboxTint);
                 
             if (skyboxMat.HasProperty("_GroundColor"))
                 skyboxMat.SetColor("_GroundColor", profile.m_groundColor);
+            
+            // Force skybox to update
+            skyboxMat.SetFloat("_UpdateTrigger", Random.Range(0f, 1f));
+            
+            // Force dynamic GI update
+            DynamicGI.UpdateEnvironment();
         }
         
         // Also update ambient settings from the profile
