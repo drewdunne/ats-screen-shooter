@@ -94,7 +94,6 @@ public class LightingModeManager : MonoBehaviour
             // If lighting profiles list is empty, try to find and load the lighting profile
             if (gaiaSceneProfile.m_lightingProfiles == null || gaiaSceneProfile.m_lightingProfiles.Count == 0)
             {
-                Debug.LogWarning($"[CheckForGaiaSceneLighting] Profiles list is empty! Attempting to load...");
                 
                 // Try to find the Gaia Lighting System Profile asset
                 var lightingProfiles = UnityEngine.Resources.FindObjectsOfTypeAll<GaiaLightingProfile>();
@@ -126,13 +125,8 @@ public class LightingModeManager : MonoBehaviour
                 
                 if (lightingProfile != null && lightingProfile.m_lightingProfiles != null)
                 {
-                    Debug.Log($"[CheckForGaiaSceneLighting] Found GaiaLightingProfile with {lightingProfile.m_lightingProfiles.Count} profiles");
                     gaiaSceneProfile.m_lightingProfiles = lightingProfile.m_lightingProfiles;
                     gaiaSceneProfile.m_masterSkyboxMaterial = lightingProfile.m_masterSkyboxMaterial;
-                }
-                else
-                {
-                    Debug.LogError("[CheckForGaiaSceneLighting] Could not find GaiaLightingProfile asset!");
                 }
             }
             
@@ -341,7 +335,6 @@ public class LightingModeManager : MonoBehaviour
         RenderSettings.ambientIntensity = darkModeAmbientIntensity;
         
         // Set Gaia lighting profile to Night
-        Debug.Log($"[SetDarkLighting] gaiaSceneProfile: {gaiaSceneProfile != null}, nightProfileIndex: {nightProfileIndex}");
         if (gaiaSceneProfile != null && nightProfileIndex >= 0)
         {
             // First check if we need to refresh the Gaia reference
