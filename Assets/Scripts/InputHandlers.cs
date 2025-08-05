@@ -18,7 +18,7 @@ public class InputHandlers : TrackerBase
     private ProjectionPlane projectionPlane;
 
     [SerializeField]
-    private InputActionReference reset, togglech, togglezerotarget;
+    private InputActionReference reset, togglech, togglezerotarget, toggledarkmode;
 
     [SerializeField]
     private Canvas crosshairCanvas;
@@ -31,6 +31,7 @@ public class InputHandlers : TrackerBase
 
     private OdysseyHubClient client;
     private ScreenShooter screenShooter;
+    private LightingModeManager lightingModeManager;
 
     private bool showCrosshair = true;
     private bool showZeroTarget = false;
@@ -61,6 +62,10 @@ public class InputHandlers : TrackerBase
         reset.action.performed += PerformReset;
         togglech.action.performed += ToggleCrosshairs;
         togglezerotarget.action.performed += ToggleZeroTarget;
+        if (toggledarkmode != null && toggledarkmode.action != null)
+        {
+            toggledarkmode.action.performed += ToggleDarkMode;
+        }
     }
 
     private void OnDisable()
@@ -68,6 +73,10 @@ public class InputHandlers : TrackerBase
         reset.action.performed -= PerformReset;
         togglech.action.performed -= ToggleCrosshairs;
         togglezerotarget.action.performed -= ToggleZeroTarget;
+        if (toggledarkmode != null && toggledarkmode.action != null)
+        {
+            toggledarkmode.action.performed -= ToggleDarkMode;
+        }
     }
 
     public void ToggleCrosshairs()
@@ -86,6 +95,14 @@ public class InputHandlers : TrackerBase
 
     private void ToggleZeroTarget(InputAction.CallbackContext obj) {
         ToggleZeroTarget();
+    }
+    
+    private void ToggleDarkMode(InputAction.CallbackContext obj)
+    {
+        if (lightingModeManager != null)
+        {
+            lightingModeManager.ToggleLightingMode();
+        }
     }
 
     public void TrackingEventHandler(ohc.uniffi.DeviceRecord deviceR, ohc.uniffi.TrackingEvent tracking)
@@ -209,6 +226,13 @@ public class InputHandlers : TrackerBase
         client = GetComponent<OdysseyHubClient>();
         screenShooter = GetComponent<ScreenShooter>();
         appConfig.Load();
+        
+        lightingModeManager = FindObjectOfType<LightingModeManager>();
+        if (lightingModeManager == null)
+        {
+            GameObject lightingManagerObj = new GameObject("LightingModeManager");
+            lightingModeManager = lightingManagerObj.AddComponent<LightingModeManager>();
+        }
     }
 
     // Update is called once per frame
