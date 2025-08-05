@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.SceneManagement;
 using Gaia;
 
 public class LightingModeManager : MonoBehaviour
@@ -314,6 +315,7 @@ public class LightingModeManager : MonoBehaviour
             
         }
         
+        // Always disable flashlight in normal mode
         if (flashlightController != null)
         {
             flashlightController.SetFlashlightEnabled(false);
@@ -391,9 +393,12 @@ public class LightingModeManager : MonoBehaviour
             }
         }
         
+        // Only enable flashlight in OutdoorRange scene
         if (flashlightController != null)
         {
-            flashlightController.SetFlashlightEnabled(true);
+            string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+            bool enableFlashlight = (currentSceneName == "OutdoorRange");
+            flashlightController.SetFlashlightEnabled(enableFlashlight);
         }
     }
     
