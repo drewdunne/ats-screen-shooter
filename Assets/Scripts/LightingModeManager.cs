@@ -11,6 +11,9 @@ public class LightingModeManager : MonoBehaviour
         Dark
     }
     
+    // Static variable to persist across scene loads
+    private static LightingMode persistedMode = LightingMode.Normal;
+    
     [Header("Settings")]
     [SerializeField] private LightingMode currentMode = LightingMode.Normal;
     [SerializeField] private float darkModeAmbientIntensity = 0.05f;
@@ -64,6 +67,13 @@ public class LightingModeManager : MonoBehaviour
         
         // Check for Gaia Scene Lighting
         CheckForGaiaSceneLighting();
+        
+        // Restore the persisted lighting mode after scene load
+        if (persistedMode != currentMode)
+        {
+            // Delay the restoration to ensure Gaia is fully initialized
+            StartCoroutine(RestorePersistedMode());
+        }
     }
     
     private void StoreOriginalLightingSettings()
@@ -138,6 +148,7 @@ public class LightingModeManager : MonoBehaviour
     public void SetLightingMode(LightingMode mode)
     {
         currentMode = mode;
+        persistedMode = mode;  // Save to static variable for persistence
         
         switch (mode)
         {
@@ -148,6 +159,60 @@ public class LightingModeManager : MonoBehaviour
                 SetDarkLighting();
                 break;
         }
+    }
+    
+    private System.Collections.IEnumerator RestorePersistedMode()
+    {
+        // Wait for end of frame to ensure scene is loaded
+        yield return new WaitForEndOfFrame();
+        
+        // Wait for Gaia to be fully initialized
+        int maxAttempts = 50; // 5 seconds max wait
+        int attempts = 0;
+        
+        while (attempts < maxAttempts)
+        {
+            GaiaGlobal gaiaGlobal = GaiaGlobal.Instance;
+            if (gaiaGlobal != null && gaiaGlobal.SceneProfile != null)
+            {
+                // Gaia is ready, wait a bit more for skybox initialization
+                yield return new WaitForSeconds(0.5f);
+                break;
+            }
+            attempts++;
+            yield return new WaitForSeconds(0.1f);
+        }
+        
+        // Force re-check for Gaia since it might have initialized after our Start
+        CheckForGaiaSceneLighting();
+        
+        // Restore the persisted mode
+        SetLightingMode(persistedMode);
+        
+        // Force a complete skybox refresh if in dark mode
+        if (persistedMode == LightingMode.Dark && nightProfileIndex >= 0)
+        {
+            yield return new WaitForSeconds(0.2f);
+            
+            // Force Gaia to fully reload the profile
+            ForceGaiaProfileReload(nightProfileIndex);
+            
+            yield return new WaitForSeconds(0.1f);
+            
+            // Force apply skybox settings again
+            ApplySkyboxFromProfile(nightProfileIndex);
+            
+            // Also force Unity to refresh the skybox
+            if (RenderSettings.skybox != null)
+            {
+                Material skybox = RenderSettings.skybox;
+                RenderSettings.skybox = null;
+                yield return null;
+                RenderSettings.skybox = skybox;
+            }
+        }
+        
+        Debug.Log($"Restored lighting mode to: {persistedMode} with skybox refresh");
     }
     
     private void SetNormalLighting()
@@ -244,6 +309,31 @@ public class LightingModeManager : MonoBehaviour
     public FlashlightController GetFlashlightController()
     {
         return flashlightController;
+    }
+    
+    private void ForceGaiaProfileReload(int profileIndex)
+    {
+        if (gaiaSceneProfile == null || profileIndex < 0)
+            return;
+            
+        // Force Gaia to reload by switching to a different profile and back
+        int tempIndex = (profileIndex == 0) ? 1 : 0;
+        if (tempIndex < gaiaSceneProfile.m_lightingProfiles.Count)
+        {
+            gaiaSceneProfile.m_selectedLightingProfileValuesIndex = tempIndex;
+            GaiaGlobal gaiaGlobal = GaiaGlobal.Instance;
+            if (gaiaGlobal != null)
+            {
+                gaiaGlobal.UpdateGaiaTimeOfDay(false);
+            }
+        }
+        
+        // Now switch to the target profile
+        gaiaSceneProfile.m_selectedLightingProfileValuesIndex = profileIndex;
+        if (GaiaGlobal.Instance != null)
+        {
+            GaiaGlobal.Instance.UpdateGaiaTimeOfDay(false);
+        }
     }
     
     private void ApplySkyboxFromProfile(int profileIndex)
