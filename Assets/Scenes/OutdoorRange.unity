@@ -2516,6 +2516,275 @@ MonoBehaviour:
   m_worldDesignerRenderedStamps: 25
   m_worldMapStamperSettings: []
   m_loadTerrainMode: 0
+--- !u!114 &640301213
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 61587e20dbbff7b4f8b950ee8040aea4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ProfileVersion: 3.4.1
+  m_reimportHDRPShader: 0
+  m_savedFromScene: 
+  m_gaiaTimeOfDay:
+    m_todStartingType: 0
+    m_todEnabled: 0
+    m_todDayTimeScale: 0
+    m_todHour: 0
+    m_todMinutes: 0
+  m_gaiaWeather:
+    m_season: 0
+    m_windDirection: 0
+  m_lodBias: 2
+  m_kelvinTexture: {fileID: 0}
+  m_lightSystemMode: 0
+  m_thirdPartyLightObject: {fileID: 0}
+  DefaultLightingSet: 0
+  m_lightingMultiSceneLightingSupport: 1
+  m_lightingUpdateInRealtime: 0
+  m_selectedLightingProfileValuesIndex: 1
+  m_profileType: 1
+  m_renamingProfile: 0
+  m_lightingEditSettings: 0
+  m_lightingBakeMode: 1
+  m_lightmappingMode: 2
+  m_masterSkyboxMaterial: {fileID: 0}
+  m_lightingProfiles: []
+  m_parentObjects: 1
+  m_hideProcessVolume: 1
+  m_enablePostProcessing: 1
+  m_enableAmbientAudio: 1
+  m_enableFog: 1
+  m_antiAliasingMode: 4
+  m_AAJitterSpread: 0.55
+  m_AAStationaryBlending: 0.95
+  m_AAMotionBlending: 0.9
+  m_AASharpness: 0.25
+  m_antiAliasingTAAStrength: 0.7
+  m_cameraDithering: 1
+  m_cameraAperture: 16
+  m_usePhysicalCamera: 0
+  m_cameraSensorSize: {x: 70.41, y: 52.63}
+  m_cameraFocalLength: 50
+  m_globalReflectionProbe: 1
+  m_isUserProfileSet: 0
+  m_enableAutoDOF: 1
+  m_dofLayerDetection:
+    serializedVersion: 2
+    m_Bits: 1
+  m_depthOfFieldFocusDistance: 50
+  m_reflectionProbeData:
+    reflectionProbeMode: 1
+    reflectionProbeRefresh: 0
+    reflectionCubemapCompression: 2
+    reflectionProbeTimeSlicingMode: 1
+    reflectionProbesPerRow: 5
+    reflectionProbeOffset: 1.8
+    reflectionProbeClipPlaneDistance: 1000
+    reflectionProbeBlendDistance: 5
+    reflectionprobeCullingMask:
+      serializedVersion: 2
+      m_Bits: 1
+    reflectionProbeShadowDistance: 100
+    reflectionProbeResolution: 2
+    lightProbesPerRow: 50
+    lightProbeSpawnRadius: 25
+    seaLevel: 50
+    filterMode: 1
+  m_universalPostFXProfile: {fileID: 0}
+  m_waterSystemMode: 0
+  m_thirdPartyWaterObject: {fileID: 0}
+  DefaultWaterSet: 0
+  m_waterMultiSceneLightingSupport: 1
+  m_waterRenamingProfile: 0
+  m_waterUpdateInRealtime: 0
+  m_allowMSAA: 0
+  m_useHDR: 0
+  m_enableDisabeHeightFeature: 1
+  m_disableHeight: 100
+  m_selectedProfile: Deep Blue Ocean
+  m_interval: 0.25
+  m_useCustomRenderDistance: 0
+  m_enableLayerDistances: 0
+  m_customRenderDistance: 500
+  m_customRenderDistances:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  m_reflectionSettingsData:
+    m_disableSkyboxReflections: 0
+    m_enableReflections: 1
+    m_ResolutionMultiplier: 1
+    m_ClipPlaneOffset: 0
+    m_ReflectLayers:
+      serializedVersion: 2
+      m_Bits: 4294967295
+    m_Shadows: 0
+    m_enableRenderDistance: 0
+    m_enableRenderDistances: 0
+    m_customRenderDistance: 500
+    m_customRenderDistances:
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    - 0
+    m_textureResolution: 512
+  m_waterEditSettings: 0
+  m_selectedWaterProfileValuesIndex: 1
+  m_autoRefresh: 1
+  m_ignoreSceneConditions: 1
+  m_refreshRate: 0.5
+  m_autoUpdateMode: 0
+  m_useCastics: 1
+  m_mainCausticLight: {fileID: 0}
+  m_causticFramePerSecond: 24
+  m_causticSize: 15
+  InfiniteMode: 1
+  m_waterPrefab: {fileID: 0}
+  m_underwaterParticles: {fileID: 0}
+  m_underwaterHorizonPrefab: {fileID: 0}
+  m_hdPlanarReflections: {fileID: 0}
+  m_transitionFXPrefab: {fileID: 0}
+  m_waterProfiles: []
+  m_activeWaterMaterial: {fileID: 0}
+  m_enableWaterMeshQuality: 0
+  m_waterMeshQuality: 2
+  m_meshType: 0
+  m_customWaterMesh: {fileID: 0}
+  m_zSize: 1000
+  m_xSize: 1000
+  m_customMeshQuality: 100
+  m_enableReflections: 1
+  m_savedWaterRenderDistances: []
+  m_savedWaterRenderDistance: 0
+  m_extraWaterRenderDistance: 0
+  m_disaleSkyboxReflection: 0
+  m_disablePixelLights: 1
+  m_reflectionResolution: 6
+  m_verifiedHDRPReflections: 0
+  m_textureResolution: 512
+  m_clipPlaneOffset: 40
+  m_reflectedLayers:
+    serializedVersion: 2
+    m_Bits: 1
+  m_hdrpReflectionIntensity: 1
+  m_enableOceanFoam: 1
+  m_enableBeachFoam: 1
+  m_enableGPUInstancing: 1
+  m_autoWindControlOnWater: 1
+  m_supportUnderwaterEffects: 1
+  m_supportUnderwaterPostProcessing: 1
+  m_supportUnderwaterFog: 1
+  m_supportUnderwaterParticles: 1
+  m_reflectShadowsHDRP: 0
+  m_roughReflectionsHDRP: 0
+  m_controllerType: 1
+  m_setupPostFX: 1
+  m_spawnPlayerAtCurrentLocation: 1
+  m_instantiateCustomControllers: 0
+  m_customPlayer: {fileID: 0}
+  m_customCamera: {fileID: 0}
+  m_enableLayerCulling: 1
+  m_cullingProfile: {fileID: 0}
+  m_sunLight: {fileID: 0}
+  m_moonLight: {fileID: 0}
+  m_terrainCullingEnabled: 1
+  m_terrainLoaderLoadMode: 0
+  m_terrainLoaderMinRefreshDistance: 0
+  m_terrainLoaderMaxRefreshDistance: 0
+  m_terrainLoaderMinRefreshMS: 0
+  m_terrainLoaderMaxRefreshMS: 0
+  m_terrainLoaderFollowTransform: 0
+  m_terrainLoaderLoadingBoundsRegular:
+    m_Center:
+      x: 0
+      y: 0
+      z: 0
+    m_Extents:
+      x: 0
+      y: 0
+      z: 0
+  m_terrainLoaderLoadingBoundsImpostor:
+    m_Center:
+      x: 0
+      y: 0
+      z: 0
+    m_Extents:
+      x: 0
+      y: 0
+      z: 0
+  m_terrainLoaderLoadingBoundsCollider:
+    m_Center:
+      x: 0
+      y: 0
+      z: 0
+    m_Extents:
+      x: 0
+      y: 0
+      z: 0
+  m_terrainLoaderDataInitialized: 0
 --- !u!1 &644519413
 GameObject:
   m_ObjectHideFlags: 0
@@ -10243,6 +10512,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2015363535}
   - component: {fileID: 2015363536}
+  - component: {fileID: 2015363537}
   m_Layer: 0
   m_Name: Gaia Lighting
   m_TagString: Untagged
@@ -10279,6 +10549,187 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb1f567dbec4e7745b9ee94c3cb29f66, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2015363537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2015363534}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 223176b09fd283c4da4828330e326a50, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_sceneProfile: {fileID: 640301213}
+  m_mainCamera: {fileID: 973326033}
+  m_globalCanvas: {fileID: 0}
+  WaterMaterial: {fileID: 0}
+  m_currentIsUserProfile: 0
+  m_typeOfLighting: Morning
+  m_lightingProfileIndex: 0
+  m_waterProfileIndex: 0
+  m_postProcessingProfile: Ambient Sample Default Evening Post Processing
+  m_directToCamera: 1
+  m_hDPostProcessingProfile: Ambient Sample Default Evening Post Processing
+  m_ambientAudio: {fileID: 0}
+  m_ambientVolume: 0.55
+  m_sunRotation: 0
+  m_sunPitch: 65
+  m_sunColor: {r: 1, g: 1, b: 1, a: 1}
+  m_sunIntensity: 1
+  m_lWSunColor: {r: 1, g: 1, b: 1, a: 1}
+  m_lWSunIntensity: 1
+  m_hDSunColor: {r: 1, g: 1, b: 1, a: 1}
+  m_hDSunIntensity: 1
+  m_shadowCastingMode: 2
+  m_shadowStrength: 1
+  m_sunShadowResolution: -1
+  m_hDShadowDistance: 700
+  m_hDShadowResolution: 2
+  m_hDContactShadows: 1
+  m_hDContactShadowQuality: 1
+  m_hDContactShadowCustomQuality: 10
+  m_hDContactShadowsDistance: 150
+  m_hDContactShadowOpacity: 1
+  m_hDMicroShadows: 1
+  m_hDMicroShadowOpacity: 1
+  m_skyboxHDRI: {fileID: 0}
+  m_skyboxTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_skyboxExposure: 1.6
+  m_sunSize: 0.04
+  m_sunConvergence: 10
+  m_atmosphereThickness: 1
+  m_groundColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_hDSkyType: 1
+  m_hDSkyUpdateMode: 0
+  m_hDHDRISkybox: {fileID: 0}
+  m_hDHDRIExposure: 0.75
+  m_hDHDRIMultiplier: 1
+  m_hDGradientTopColor: {r: 0, g: 0, b: 1, a: 1}
+  m_hDGradientMiddleColor: {r: 0, g: 1, b: 1, a: 1}
+  m_hDGradientBottomColor: {r: 1, g: 1, b: 1, a: 1}
+  m_hDGradientDiffusion: 1
+  m_hDGradientExposure: 0
+  m_hDGradientMultiplier: 1
+  m_hDProceduralEnableSunDisk: 1
+  m_hDProceduralIncludeSunInBaking: 1
+  m_hDProceduralSunSize: 0.015
+  m_hDProceduralSunSizeConvergence: 9.5
+  m_hDProceduralAtmosphereThickness: 1
+  m_hDProceduralSkyTint:
+    serializedVersion: 2
+    rgba: 2155905152
+  m_hDProceduralGroundColor:
+    serializedVersion: 2
+    rgba: 4289765780
+  m_hDProceduralExposure: 1
+  m_hDProceduralMultiplier: 2.5
+  m_hDPBSEarthPreset: 1
+  m_hDPBSPlanetaryRadius: 6378.759
+  m_hDPBSSphericalMode: 1
+  m_hDPBSSeaLevel: 50
+  m_hDPBSPlantetCenterPosition: {x: 0, y: -6378.759, z: 0}
+  m_hDPBSPlanetRotation: {x: 0, y: 0, z: 0}
+  m_hDPBSGroundAlbedoTexture: {fileID: 0}
+  m_hDPBSGroundTint: {r: 0.5803922, g: 0.6313726, b: 0.6901961, a: 1}
+  m_hDPBSGroundEmissionTexture: {fileID: 0}
+  m_hDPBSGroundEmissionMultiplier: 1
+  m_hDPBSSpaceRotation: {x: 0, y: 0, z: 0}
+  m_hDPBSSpaceEmissionTexture: {fileID: 0}
+  m_hDPBSSpaceEmissionMultiplier: 1
+  m_hDPBSAirMaximumAltitude: 70
+  m_hDPBSAirOpacity: {r: 1, g: 1, b: 1, a: 1}
+  m_hDPBSAirAlbedo: {r: 1, g: 1, b: 1, a: 1}
+  m_hDPBSAirDensityBlue: 0.232
+  m_hDPBSAirTint: {r: 0.172, g: 0.074, b: 0.03, a: 1}
+  m_hDPBSAerosolMaximumAltitude: 8.3
+  m_hDPBSAerosolDensity: 0.5
+  m_hDPBSAerosolAlbedo: {r: 1, g: 1, b: 1, a: 1}
+  m_hDPBSAerosolAnisotropy: 0
+  m_hDPBSColorSaturation: 1
+  m_hDPBSAlphaSaturation: 1
+  m_hDPBSAlphaMultiplier: 1
+  m_hDPBSHorizonTint: {r: 1, g: 1, b: 1, a: 1}
+  m_hDPBSHorizonZenithShift: 0
+  m_hDPBSZenithTint: {r: 1, g: 1, b: 1, a: 1}
+  m_hDPBSNumberOfBounces: 8
+  m_hDPBSIntensityMode: 0
+  m_hDPBSMultiplier: 1
+  m_hDPBSExposure: 1
+  m_hDPBSIncludeSunInBaking: 1
+  m_ambientMode: 1
+  m_ambientIntensity: 1
+  m_skyAmbient: {r: 1, g: 1, b: 1, a: 1}
+  m_equatorAmbient: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_groundAmbient: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+  m_hDAmbientMode: 0
+  m_hDAmbientDiffuseIntensity: 1
+  m_hDAmbientSpecularIntensity: 1
+  m_fogMode: 1
+  m_fogColor: {r: 1, g: 1, b: 1, a: 1}
+  m_fogDensity: 0.01
+  m_fogStartDistance: 15
+  m_fogEndDistance: 800
+  m_hDFogType: 3
+  m_hDFogType2019_3: 1
+  m_hDExponentialFogDensity: 1
+  m_hDExponentialFogDistance: 200
+  m_hDExponentialFogBaseHeight: 0
+  m_hDExponentialFogHeightAttenuation: 0.2
+  m_hDExponentialFogMaxDistance: 5000
+  m_hDLinearFogDensity: 1
+  m_hDLinearFogStart: 5
+  m_hDLinearFogEnd: 1200
+  m_hDLinearFogHeightStart: 100
+  m_hDLinearFogHeightEnd: 800
+  m_hDLinearFogMaxDistance: 5000
+  m_hDVolumetricFogScatterColor: {r: 1, g: 1, b: 1, a: 1}
+  m_hDVolumetricFogDistance: 1000
+  m_hDVolumetricFogBaseHeight: 100
+  m_hDVolumetricFogMeanHeight: 200
+  m_hDVolumetricFogAnisotropy: 0.75
+  m_hDVolumetricFogProbeDimmer: 0.8
+  m_hDVolumetricFogMaxDistance: 5000
+  m_hDVolumetricFogDepthExtent: 50
+  m_hDVolumetricFogSliceDistribution: 0
+  m_lightmappingMode: 2
+  m_lightingHasBeenSaved: 0
+  m_lightingProfile: {fileID: 0}
+  m_waterProfile: {fileID: 0}
+  m_waterHasBeenSaved: 0
+  m_masterSkyboxMaterial: {fileID: 0}
+  m_parentObjects: 1
+  m_hideProcessVolume: 1
+  m_enablePostProcessing: 1
+  m_enableAmbientAudio: 1
+  m_enableFog: 1
+  m_antiAliasingMode: 4
+  m_AAJitterSpread: 0.55
+  m_AAStationaryBlending: 0.95
+  m_AAMotionBlending: 0.9
+  m_AASharpness: 0.25
+  m_antiAliasingTAAStrength: 0.7
+  m_cameraDithering: 1
+  m_cameraAperture: 16
+  m_usePhysicalCamera: 0
+  m_cameraSensorSize: {x: 70.41, y: 52.63}
+  m_globalReflectionProbe: 1
+  m_gaiaTimeOfDay:
+    m_todStartingType: 0
+    m_todEnabled: 0
+    m_todDayTimeScale: 0
+    m_todHour: 0
+    m_todMinutes: 0
+  m_gaiaWeather:
+    m_season: 0
+    m_windDirection: 0
+  m_sunLight: {fileID: 485079454}
+  m_moonLight: {fileID: 0}
+  WeatherPresent: 0
+  WeatherSystem: {fileID: 0}
+  m_sunLightExists: 1
+  m_moonLightExists: 0
 --- !u!1 &2017235414
 GameObject:
   m_ObjectHideFlags: 0
