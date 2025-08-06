@@ -18,9 +18,9 @@ public class LightingModeManager : MonoBehaviour
     
     [Header("Settings")]
     [SerializeField] private LightingMode currentMode = LightingMode.Normal;
-    [SerializeField] private float darkModeAmbientIntensity = 0.05f;
+    [SerializeField] private float darkModeAmbientIntensity = 0.01f; // Much darker
     [SerializeField] private float normalModeAmbientIntensity = 1f;
-    [SerializeField] private Color darkModeAmbientColor = new Color(0.05f, 0.05f, 0.1f);
+    [SerializeField] private Color darkModeAmbientColor = new Color(0.01f, 0.01f, 0.015f); // Nearly black with slight blue tint
     [SerializeField] private Color normalModeAmbientColor = Color.white;
     
     [Header("References")]
@@ -392,6 +392,16 @@ public class LightingModeManager : MonoBehaviour
                 }
             }
         }
+        
+        // Force even darker settings after Gaia profile is applied
+        RenderSettings.ambientLight = darkModeAmbientColor;
+        RenderSettings.ambientIntensity = darkModeAmbientIntensity;
+        RenderSettings.ambientSkyColor = darkModeAmbientColor;
+        RenderSettings.ambientEquatorColor = darkModeAmbientColor * 0.5f;
+        RenderSettings.ambientGroundColor = Color.black;
+        
+        // Make fog darker too
+        RenderSettings.fogColor = new Color(0.01f, 0.01f, 0.02f);
         
         // Only enable flashlight in OutdoorRange scene
         if (flashlightController != null)
