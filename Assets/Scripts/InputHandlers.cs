@@ -64,21 +64,12 @@ public class InputHandlers : TrackerBase
         reset.action.Enable();
         togglech.action.Enable();
         togglezerotarget.action.Enable();
+        toggledarkmode.action.Enable();
         
         reset.action.performed += PerformReset;
         togglech.action.performed += ToggleCrosshairs;
         togglezerotarget.action.performed += ToggleZeroTarget;
-        
-        // Use AppControls for dark mode toggle if toggledarkmode reference is not set
-        if (toggledarkmode != null && toggledarkmode.action != null)
-        {
-            toggledarkmode.action.Enable();
-            toggledarkmode.action.performed += ToggleDarkMode;
-        }
-        else if (appControls != null)
-        {
-            appControls.Player.ToggleDarkMode.performed += ToggleDarkMode;
-        }
+        toggledarkmode.action.performed += ToggleDarkMode;
     }
 
     private void OnDisable()
@@ -86,21 +77,13 @@ public class InputHandlers : TrackerBase
         reset.action.performed -= PerformReset;
         togglech.action.performed -= ToggleCrosshairs;
         togglezerotarget.action.performed -= ToggleZeroTarget;
-        
-        if (toggledarkmode != null && toggledarkmode.action != null)
-        {
-            toggledarkmode.action.performed -= ToggleDarkMode;
-            toggledarkmode.action.Disable();
-        }
-        else if (appControls != null)
-        {
-            appControls.Player.ToggleDarkMode.performed -= ToggleDarkMode;
-        }
+        toggledarkmode.action.performed -= ToggleDarkMode;
         
         // Disable all the actions
         reset.action.Disable();
         togglech.action.Disable();
         togglezerotarget.action.Disable();
+        toggledarkmode.action.Disable();
     }
 
     public void ToggleCrosshairs()
@@ -251,13 +234,11 @@ public class InputHandlers : TrackerBase
         screenShooter = GetComponent<ScreenShooter>();
         appConfig.Load();
         
-        // Initialize AppControls if toggledarkmode reference is not set
         if (toggledarkmode == null || toggledarkmode.action == null)
         {
             appControls = new AppControls();
             appControls.Player.Enable();
             
-            // Subscribe to the action here as well since Start happens before OnEnable
             appControls.Player.ToggleDarkMode.performed += ToggleDarkMode;
         }
         
