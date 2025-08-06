@@ -44,16 +44,13 @@ public class LightingModeManager : MonoBehaviour
     
     void Awake()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Awake() called - Initializing lighting system");
-        
         if (flashlightController == null)
         {
-            Debug.LogError($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: FlashlightController not assigned! Please assign it in the Inspector.");
+            Debug.LogError("LightingModeManager: FlashlightController not assigned! Please assign it in the Inspector.");
         }
         
         StoreOriginalLightingSettings();
         FindSceneLights();
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Stored original settings and found {sceneLights.Count} scene lights");
     }
     
     void OnDestroy()
@@ -63,22 +60,18 @@ public class LightingModeManager : MonoBehaviour
         {
             b27TargetMaterial.SetColor("_BaseColor", Color.white);
             b27TargetMaterial.SetColor("_Color", Color.white);
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: OnDestroy() - Reset B27 target material to white");
         }
     }
     
     
     void Start()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Start() called - Scene: {UnityEngine.SceneManagement.SceneManager.GetActiveScene().name}");
-        
         if (flashlightController != null)
         {
             GameObject projectionCamera = GameObject.Find("ProjectionPlaneCamera");
             if (projectionCamera != null)
             {
                 flashlightController.AttachToTransform(projectionCamera.transform);
-                Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Attached flashlight to ProjectionPlaneCamera");
             }
             else
             {
@@ -86,7 +79,6 @@ public class LightingModeManager : MonoBehaviour
                 if (mainCam != null)
                 {
                     flashlightController.AttachToTransform(mainCam.transform);
-                    Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Attached flashlight to Main Camera");
                 }
             }
         }
@@ -96,7 +88,6 @@ public class LightingModeManager : MonoBehaviour
         
         // Always attempt to restore the persisted lighting mode after scene load
         // Even if modes match, we need to reapply settings for the new scene
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Starting coroutine to restore persisted mode: {persistedMode}");
         StartCoroutine(RestorePersistedMode());
     }
     
@@ -111,8 +102,6 @@ public class LightingModeManager : MonoBehaviour
     
     private void CheckForGaiaSceneLighting()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Checking for Gaia Scene Lighting");
-        
         // Try to get Gaia Global instance which contains the scene profile
         GaiaGlobal gaiaGlobal = GaiaGlobal.Instance;
         if (gaiaGlobal != null && gaiaGlobal.SceneProfile != null)
@@ -177,12 +166,10 @@ public class LightingModeManager : MonoBehaviour
                     if (profileNameLower.Contains("day") || profileNameLower.Contains("noon"))
                     {
                         dayProfileIndex = i;
-                        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Found Day profile at index {i}: {profileName}");
                     }
                     else if (profileNameLower.Contains("night") || profileNameLower.Contains("midnight"))
                     {
                         nightProfileIndex = i;
-                        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Found Night profile at index {i}: {profileName}");
                     }
                 }
             }
@@ -215,13 +202,12 @@ public class LightingModeManager : MonoBehaviour
     public void ToggleLightingMode()
     {
         var newMode = currentMode == LightingMode.Normal ? LightingMode.Dark : LightingMode.Normal;
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: ToggleLightingMode() called - Switching from {currentMode} to {newMode}");
         SetLightingMode(newMode);
     }
     
     public void SetLightingMode(LightingMode mode)
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: SetLightingMode() called - Setting mode to {mode} (was {currentMode})");
+        Debug.Log($"LightingModeManager: Dark Mode {(mode == LightingMode.Dark ? "ON" : "OFF")}");
         
         currentMode = mode;
         persistedMode = mode;  // Save to static variable for persistence
@@ -229,25 +215,19 @@ public class LightingModeManager : MonoBehaviour
         switch (mode)
         {
             case LightingMode.Normal:
-                Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Executing SetNormalLighting()");
                 SetNormalLighting();
                 break;
             case LightingMode.Dark:
-                Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Executing SetDarkLighting()");
                 SetDarkLighting();
                 break;
         }
         
         // Update target material based on lighting mode
         UpdateTargetMaterial(mode);
-        
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Lighting mode change complete - Current mode: {currentMode}");
     }
     
     private System.Collections.IEnumerator RestorePersistedMode()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: RestorePersistedMode() coroutine started - Target mode: {persistedMode}");
-        
         // Wait for end of frame to ensure scene is loaded
         yield return new WaitForEndOfFrame();
         
@@ -260,7 +240,6 @@ public class LightingModeManager : MonoBehaviour
             GaiaGlobal gaiaGlobal = GaiaGlobal.Instance;
             if (gaiaGlobal != null && gaiaGlobal.SceneProfile != null)
             {
-                Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Gaia is ready after {attempts} attempts");
                 // Gaia is ready, wait a bit more for skybox initialization
                 yield return new WaitForSeconds(0.5f);
                 break;
@@ -271,7 +250,7 @@ public class LightingModeManager : MonoBehaviour
         
         if (attempts >= maxAttempts)
         {
-            Debug.LogWarning($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Gaia initialization timeout after {maxAttempts} attempts");
+            Debug.LogWarning($"LightingModeManager: Gaia initialization timeout after {maxAttempts} attempts");
         }
         
         // Force re-check for Gaia since it might have initialized after our Start
@@ -281,7 +260,6 @@ public class LightingModeManager : MonoBehaviour
         yield return new WaitForSeconds(0.5f);
         
         // Now restore the persisted mode
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Restoring persisted lighting mode: {persistedMode}");
         SetLightingMode(persistedMode);
         
         // Force a complete skybox refresh if in dark mode
@@ -333,8 +311,6 @@ public class LightingModeManager : MonoBehaviour
     
     private void SetNormalLighting()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: SetNormalLighting() - Restoring {sceneLights.Count} scene lights");
-        
         foreach (Light light in sceneLights)
         {
             if (light != null && originalIntensities.ContainsKey(light))
@@ -352,7 +328,6 @@ public class LightingModeManager : MonoBehaviour
         {
             // Use original profile if it wasn't night, otherwise use day
             int targetProfile = (originalLightingProfileIndex != nightProfileIndex) ? originalLightingProfileIndex : dayProfileIndex;
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Setting Gaia profile to index {targetProfile} (Day/Original)");
             gaiaSceneProfile.m_selectedLightingProfileValuesIndex = targetProfile;
             
             // Force update of Gaia lighting
@@ -370,15 +345,12 @@ public class LightingModeManager : MonoBehaviour
         // Always disable flashlight in normal mode
         if (flashlightController != null)
         {
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Disabling flashlight for Normal mode");
             flashlightController.SetFlashlightEnabled(false);
         }
     }
     
     private void SetDarkLighting()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: SetDarkLighting() - Reducing intensity of {sceneLights.Count} scene lights to {darkModeLightIntensityMultiplier * 100}%");
-        
         foreach (Light light in sceneLights)
         {
             if (light != null && originalIntensities.ContainsKey(light))
@@ -386,7 +358,6 @@ public class LightingModeManager : MonoBehaviour
                 // Keep lights on but at reduced intensity for target visibility
                 light.intensity = originalIntensities[light] * darkModeLightIntensityMultiplier;
                 light.enabled = true;
-                Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Set {light.name} intensity to {light.intensity} (was {originalIntensities[light]})");
             }
         }
         
@@ -409,8 +380,6 @@ public class LightingModeManager : MonoBehaviour
             
             if (nightProfileIndex >= 0 && gaiaSceneProfile != null)
             {
-                Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Setting Gaia profile to Night (index {nightProfileIndex})");
-                
                 // Get the night profile
                 GaiaLightingProfileValues nightProfile = gaiaSceneProfile.m_lightingProfiles[nightProfileIndex];
                 
@@ -464,7 +433,10 @@ public class LightingModeManager : MonoBehaviour
         {
             string currentSceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
             bool enableFlashlight = (currentSceneName == "OutdoorRange");
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Scene is '{currentSceneName}' - Flashlight enabled: {enableFlashlight}");
+            if (enableFlashlight)
+            {
+                Debug.Log("LightingModeManager: Flashlight ON");
+            }
             flashlightController.SetFlashlightEnabled(enableFlashlight);
         }
     }
@@ -483,11 +455,8 @@ public class LightingModeManager : MonoBehaviour
     {
         if (gaiaSceneProfile == null || profileIndex < 0)
         {
-            Debug.LogWarning($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: ForceGaiaProfileReload() skipped - Invalid profile or index");
             return;
         }
-        
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: ForceGaiaProfileReload() - Forcing reload of profile {profileIndex}");
             
         // Force Gaia to reload by switching to a different profile and back
         int tempIndex = (profileIndex == 0) ? 1 : 0;
@@ -513,11 +482,8 @@ public class LightingModeManager : MonoBehaviour
     {
         if (gaiaSceneProfile == null || profileIndex < 0 || profileIndex >= gaiaSceneProfile.m_lightingProfiles.Count)
         {
-            Debug.LogWarning($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: ApplySkyboxFromProfile() skipped - Invalid profile index {profileIndex}");
             return;
         }
-        
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: ApplySkyboxFromProfile() - Applying skybox settings from profile {profileIndex}");
             
         GaiaLightingProfileValues profile = gaiaSceneProfile.m_lightingProfiles[profileIndex];
         if (profile == null)
@@ -602,38 +568,20 @@ public class LightingModeManager : MonoBehaviour
     {
         if (b27TargetMaterial == null)
         {
-            Debug.LogWarning($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: B27TargetMaterial not assigned in Inspector - skipping material adjustment");
             return;
         }
-        
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: UpdateTargetMaterial called with mode: {mode}, Material name: {b27TargetMaterial.name}");
-        
-        // Check current values before changing
-        Color currentBaseColor = b27TargetMaterial.GetColor("_BaseColor");
-        Color currentColor = b27TargetMaterial.GetColor("_Color");
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Current _BaseColor: {currentBaseColor}, Current _Color: {currentColor}");
         
         if (mode == LightingMode.Dark)
         {
             // Set base color for visibility without flashlight, but not so bright it washes out
             b27TargetMaterial.SetColor("_BaseColor", new Color(0.65f, 0.65f, 0.65f, 1f));
             b27TargetMaterial.SetColor("_Color", new Color(0.65f, 0.65f, 0.65f, 1f));
-            
-            // Verify the change
-            Color newBaseColor = b27TargetMaterial.GetColor("_BaseColor");
-            Color newColor = b27TargetMaterial.GetColor("_Color");
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Set B27 target material to dark mode - New _BaseColor: {newBaseColor}, New _Color: {newColor}");
         }
         else
         {
             // Restore to white for normal mode
             b27TargetMaterial.SetColor("_BaseColor", Color.white);
             b27TargetMaterial.SetColor("_Color", Color.white);
-            
-            // Verify the change
-            Color newBaseColor = b27TargetMaterial.GetColor("_BaseColor");
-            Color newColor = b27TargetMaterial.GetColor("_Color");
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] LightingModeManager: Set B27 target material to normal mode - New _BaseColor: {newBaseColor}, New _Color: {newColor}");
         }
     }
 }

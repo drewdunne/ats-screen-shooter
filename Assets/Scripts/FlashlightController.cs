@@ -4,15 +4,15 @@ using UnityEngine.Rendering.Universal;
 public class FlashlightController : MonoBehaviour
 {
     [Header("Flashlight Settings")]
-    [SerializeField] private float intensity = 600f; // 2x brightness for better visibility
+    [SerializeField] private float intensity = 600f;
     [SerializeField] private float range = 100f;
-    [SerializeField] private float spotAngle = 25f; // Slightly wider for better coverage
+    [SerializeField] private float spotAngle = 25f;
     [SerializeField] private float innerSpotAngle = 10f;
-    [SerializeField] private Color lightColor = new Color(0.95f, 0.95f, 1f); // Bright white light
-    [SerializeField] private AnimationCurve falloffCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f); // Falloff over distance
+    [SerializeField] private Color lightColor = new Color(0.95f, 0.95f, 1f);
+    [SerializeField] private AnimationCurve falloffCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f);
     
     [Header("Mounting Position")]
-    [SerializeField] private Vector3 mountOffset = new Vector3(0.1f, -0.15f, 0.3f); // Right, down, forward from camera
+    [SerializeField] private Vector3 mountOffset = new Vector3(0.1f, -0.15f, 0.3f);
     
     [Header("References")]
     [SerializeField] private Light flashlightLight;
@@ -24,11 +24,8 @@ public class FlashlightController : MonoBehaviour
     
     void Awake()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Awake() called");
-        
         if (flashlightLight == null)
         {
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Creating flashlight");
             CreateFlashlight();
         }
         
@@ -37,20 +34,16 @@ public class FlashlightController : MonoBehaviour
     
     void Start()
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Start() called");
-        
         inputHandlers = FindObjectOfType<InputHandlers>();
         
         GameObject projectionCamera = GameObject.Find("ProjectionPlaneCamera");
         if (projectionCamera != null)
         {
             targetCamera = projectionCamera.GetComponent<Camera>();
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Using ProjectionPlaneCamera as target");
         }
         else
         {
             targetCamera = Camera.main;
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Using Main Camera as target");
         }
     }
     
@@ -66,11 +59,10 @@ public class FlashlightController : MonoBehaviour
                     if (player != null && player.point != null)
                     {
                         Vector2 screenPointNormal = player.point;
-                        // Convert normalized coordinates to screen coordinates
                         Vector3 screenPoint = new Vector3(
                             screenPointNormal.x * Screen.width,
                             Screen.height - screenPointNormal.y * Screen.height,
-                            10f // Distance from camera for ray calculation
+                            10f
                         );
                         
                         Ray ray = targetCamera.ScreenPointToRay(screenPoint);
@@ -127,47 +119,39 @@ public class FlashlightController : MonoBehaviour
         flashlightLight.shadowBias = 0.05f;
         flashlightLight.shadowNormalBias = 0.4f;
         
-        // Configure for softer light to prevent overexposure
-        flashlightLight.renderMode = LightRenderMode.ForcePixel; // Ensure per-pixel lighting
-        flashlightLight.bounceIntensity = 0.1f; // Minimal bounce light
+        flashlightLight.renderMode = LightRenderMode.ForcePixel;
+        flashlightLight.bounceIntensity = 0.1f;
         
         UniversalAdditionalLightData lightData = flashlightObj.AddComponent<UniversalAdditionalLightData>();
         
-        // Configure URP-specific settings for better control
         lightData.usePipelineSettings = false;
         lightData.lightCookieSize = new Vector2(1f, 1f);
         lightData.lightCookieOffset = Vector2.zero;
         
-        // Set soft shadows for less harsh lighting
         lightData.softShadowQuality = UnityEngine.Rendering.Universal.SoftShadowQuality.High;
     }
     
     public void AttachToTransform(Transform target)
     {
         attachmentPoint = target;
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Attached to transform: {(target != null ? target.name : "null")}");
     }
     
     public void ToggleFlashlight()
     {
         bool newState = !isEnabled;
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: ToggleFlashlight() called - Switching from {isEnabled} to {newState}");
         SetFlashlightEnabled(newState);
     }
     
     public void SetFlashlightEnabled(bool enabled)
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: SetFlashlightEnabled({enabled}) - Previous state: {isEnabled}");
-        
         isEnabled = enabled;
         if (flashlightLight != null)
         {
             flashlightLight.enabled = enabled;
-            Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: Flashlight light component enabled: {enabled}");
         }
         else
         {
-            Debug.LogWarning($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: flashlightLight is null, cannot set enabled state");
+            Debug.LogWarning("FlashlightController: flashlightLight is null, cannot set enabled state");
         }
     }
     
@@ -178,21 +162,16 @@ public class FlashlightController : MonoBehaviour
     
     public void SetIntensity(float newIntensity)
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: SetIntensity({newIntensity}) - Previous: {intensity}");
-        
-        intensity = Mathf.Clamp(newIntensity, 0f, 500f); // Higher cap for terrain visibility
+        intensity = Mathf.Clamp(newIntensity, 0f, 500f);
         if (flashlightLight != null)
         {
             flashlightLight.intensity = intensity;
-            // Keep color consistent, don't dim it with intensity
             flashlightLight.color = lightColor;
         }
     }
     
     public void SetRange(float newRange)
     {
-        Debug.Log($"[{System.DateTime.Now:HH:mm:ss.fff}] FlashlightController: SetRange({newRange}) - Previous: {range}");
-        
         range = newRange;
         if (flashlightLight != null)
         {
