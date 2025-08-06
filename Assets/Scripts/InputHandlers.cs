@@ -32,6 +32,7 @@ public class InputHandlers : TrackerBase
     private OdysseyHubClient client;
     private ScreenShooter screenShooter;
     private LightingModeManager lightingModeManager;
+    private AppControls appControls;
 
     private bool showCrosshair = true;
     private bool showZeroTarget = false;
@@ -59,12 +60,24 @@ public class InputHandlers : TrackerBase
 
     private void OnEnable()
     {
+        // Enable all the actions
+        reset.action.Enable();
+        togglech.action.Enable();
+        togglezerotarget.action.Enable();
+        
         reset.action.performed += PerformReset;
         togglech.action.performed += ToggleCrosshairs;
         togglezerotarget.action.performed += ToggleZeroTarget;
+        
+        // Use AppControls for dark mode toggle if toggledarkmode reference is not set
         if (toggledarkmode != null && toggledarkmode.action != null)
         {
+            toggledarkmode.action.Enable();
             toggledarkmode.action.performed += ToggleDarkMode;
+        }
+        else if (appControls != null)
+        {
+            appControls.Player.ToggleDarkMode.performed += ToggleDarkMode;
         }
     }
 
@@ -73,10 +86,21 @@ public class InputHandlers : TrackerBase
         reset.action.performed -= PerformReset;
         togglech.action.performed -= ToggleCrosshairs;
         togglezerotarget.action.performed -= ToggleZeroTarget;
+        
         if (toggledarkmode != null && toggledarkmode.action != null)
         {
             toggledarkmode.action.performed -= ToggleDarkMode;
+            toggledarkmode.action.Disable();
         }
+        else if (appControls != null)
+        {
+            appControls.Player.ToggleDarkMode.performed -= ToggleDarkMode;
+        }
+        
+        // Disable all the actions
+        reset.action.Disable();
+        togglech.action.Disable();
+        togglezerotarget.action.Disable();
     }
 
     public void ToggleCrosshairs()
@@ -227,6 +251,16 @@ public class InputHandlers : TrackerBase
         screenShooter = GetComponent<ScreenShooter>();
         appConfig.Load();
         
+        // Initialize AppControls if toggledarkmode reference is not set
+        if (toggledarkmode == null || toggledarkmode.action == null)
+        {
+            appControls = new AppControls();
+            appControls.Player.Enable();
+            
+            // Subscribe to the action here as well since Start happens before OnEnable
+            appControls.Player.ToggleDarkMode.performed += ToggleDarkMode;
+        }
+        
         lightingModeManager = FindObjectOfType<LightingModeManager>();
         if (lightingModeManager == null)
         {
@@ -238,6 +272,15 @@ public class InputHandlers : TrackerBase
     // Update is called once per frame
     void Update()
     {
+    }
+
+    void OnDestroy()
+    {
+        if (appControls != null)
+        {
+            appControls.Player.Disable();
+            appControls.Dispose();
+        }
     }
 
     void OnGUI() {
