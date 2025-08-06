@@ -6,9 +6,13 @@ public class FlashlightController : MonoBehaviour
     [Header("Flashlight Settings")]
     [SerializeField] private float intensity = 5000f; // Increased for outdoor visibility
     [SerializeField] private float range = 100f; // Increased range for outdoor
-    [SerializeField] private float spotAngle = 25f; // Wider beam
-    [SerializeField] private float innerSpotAngle = 10f;
+    [SerializeField] private float spotAngle = 20f; // Narrower for more dramatic ellipse
+    [SerializeField] private float innerSpotAngle = 8f;
     [SerializeField] private Color lightColor = new Color(0.95f, 0.95f, 1f);
+    [SerializeField] private AnimationCurve falloffCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f); // Falloff over distance
+    
+    [Header("Mounting Position")]
+    [SerializeField] private Vector3 mountOffset = new Vector3(0.1f, -0.15f, 0.3f); // Right, down, forward from camera
     
     [Header("References")]
     [SerializeField] private Light flashlightLight;
@@ -69,11 +73,32 @@ public class FlashlightController : MonoBehaviour
                         // Convert screen point to world ray
                         Ray ray = targetCamera.ScreenPointToRay(screenPoint);
                         
-                        // Point the flashlight along the ray direction
+                        // Point the flashlight from offset position toward aim point
                         if (flashlightLight != null)
                         {
-                            flashlightLight.transform.position = ray.origin;
-                            flashlightLight.transform.rotation = Quaternion.LookRotation(ray.direction);
+                            // Calculate flashlight mount position (offset from camera)
+                            Vector3 lightPosition = targetCamera.transform.position + 
+                                targetCamera.transform.right * mountOffset.x +
+                                targetCamera.transform.up * mountOffset.y +
+                                targetCamera.transform.forward * mountOffset.z;
+                            
+                            // Find where the ray hits something (or use a far point)
+                            Vector3 targetPoint;
+                            RaycastHit hit;
+                            if (Physics.Raycast(ray, out hit, range))
+                            {
+                                targetPoint = hit.point;
+                            }
+                            else
+                            {
+                                // If no hit, aim at a point along the ray at max range
+                                targetPoint = ray.origin + ray.direction * range;
+                            }
+                            
+                            // Position light at mount point and aim at target
+                            flashlightLight.transform.position = lightPosition;
+                            Vector3 aimDirection = (targetPoint - lightPosition).normalized;
+                            flashlightLight.transform.rotation = Quaternion.LookRotation(aimDirection);
                         }
                         
                         break; // Only track the first player
@@ -104,6 +129,10 @@ public class FlashlightController : MonoBehaviour
         
         // Add URP additional light data component for better light control
         UniversalAdditionalLightData lightData = flashlightObj.AddComponent<UniversalAdditionalLightData>();
+        // Use inverse square falloff for realistic light attenuation
+        lightData.usePipelineSettings = false;
+        lightData.lightCookieSize = new Vector2(1f, 1f);
+        lightData.lightCookieOffset = Vector2.zero;
     }
     
     public void AttachToTransform(Transform target)
