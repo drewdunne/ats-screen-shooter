@@ -4,9 +4,9 @@ using UnityEngine.Rendering.Universal;
 public class FlashlightController : MonoBehaviour
 {
     [Header("Flashlight Settings")]
-    [SerializeField] private float intensity = 5000f; // Increased for outdoor visibility
-    [SerializeField] private float range = 100f; // Increased range for outdoor
-    [SerializeField] private float spotAngle = 20f; // Narrower for more dramatic ellipse
+    [SerializeField] private float intensity = 5000f;
+    [SerializeField] private float range = 100f;
+    [SerializeField] private float spotAngle = 20f;
     [SerializeField] private float innerSpotAngle = 8f;
     [SerializeField] private Color lightColor = new Color(0.95f, 0.95f, 1f);
     [SerializeField] private AnimationCurve falloffCurve = AnimationCurve.EaseInOut(0f, 1f, 1f, 0f); // Falloff over distance
@@ -34,10 +34,8 @@ public class FlashlightController : MonoBehaviour
     
     void Start()
     {
-        // Find the InputHandlers to track crosshair
         inputHandlers = FindObjectOfType<InputHandlers>();
         
-        // Find the camera we're attached to
         GameObject projectionCamera = GameObject.Find("ProjectionPlaneCamera");
         if (projectionCamera != null)
         {
@@ -51,10 +49,8 @@ public class FlashlightController : MonoBehaviour
     
     void Update()
     {
-        // Track crosshair position if flashlight is enabled
         if (isEnabled && inputHandlers != null && targetCamera != null)
         {
-            // Get the first player's aim point (primary crosshair)
             var players = inputHandlers.Players;
             if (players != null)
             {
@@ -70,19 +66,15 @@ public class FlashlightController : MonoBehaviour
                             10f // Distance from camera for ray calculation
                         );
                         
-                        // Convert screen point to world ray
                         Ray ray = targetCamera.ScreenPointToRay(screenPoint);
                         
-                        // Point the flashlight from offset position toward aim point
                         if (flashlightLight != null)
                         {
-                            // Calculate flashlight mount position (offset from camera)
                             Vector3 lightPosition = targetCamera.transform.position + 
                                 targetCamera.transform.right * mountOffset.x +
                                 targetCamera.transform.up * mountOffset.y +
                                 targetCamera.transform.forward * mountOffset.z;
                             
-                            // Find where the ray hits something (or use a far point)
                             Vector3 targetPoint;
                             RaycastHit hit;
                             if (Physics.Raycast(ray, out hit, range))
@@ -91,17 +83,15 @@ public class FlashlightController : MonoBehaviour
                             }
                             else
                             {
-                                // If no hit, aim at a point along the ray at max range
                                 targetPoint = ray.origin + ray.direction * range;
                             }
                             
-                            // Position light at mount point and aim at target
                             flashlightLight.transform.position = lightPosition;
                             Vector3 aimDirection = (targetPoint - lightPosition).normalized;
                             flashlightLight.transform.rotation = Quaternion.LookRotation(aimDirection);
                         }
                         
-                        break; // Only track the first player
+                        break;
                     }
                 }
             }
@@ -127,8 +117,8 @@ public class FlashlightController : MonoBehaviour
         flashlightLight.shadowBias = 0.05f;
         flashlightLight.shadowNormalBias = 0.4f;
         
-        // Add URP additional light data component for better light control
         UniversalAdditionalLightData lightData = flashlightObj.AddComponent<UniversalAdditionalLightData>();
+        
         // Use inverse square falloff for realistic light attenuation
         lightData.usePipelineSettings = false;
         lightData.lightCookieSize = new Vector2(1f, 1f);
@@ -138,8 +128,6 @@ public class FlashlightController : MonoBehaviour
     public void AttachToTransform(Transform target)
     {
         attachmentPoint = target;
-        // Don't parent the flashlight to the attachment point anymore
-        // We'll control its position manually in Update()
     }
     
     public void ToggleFlashlight()
