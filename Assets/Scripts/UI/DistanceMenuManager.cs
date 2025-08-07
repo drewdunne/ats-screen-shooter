@@ -16,7 +16,7 @@ public class DistanceMenuManager : MonoBehaviour
     public TextMeshProUGUI fifteenYardText;
     
     [Header("Target Reference")]
-    public GameObject b27Target; // The B27 Paper Target w Stand GameObject
+    public GameObject b27Target;
     
     [Header("Distance Settings")]
     [SerializeField] private float threeYardDistance = 3f;
@@ -34,7 +34,6 @@ public class DistanceMenuManager : MonoBehaviour
         
         if (b27Target == null)
         {
-            // Try to find the B27 target in the scene
             GameObject[] targets = GameObject.FindObjectsOfType<GameObject>();
             foreach (GameObject obj in targets)
             {
@@ -59,7 +58,6 @@ public class DistanceMenuManager : MonoBehaviour
     {
         inputActions.Enable();
         
-        // Set up button listeners
         if (threeYardButton != null)
             threeYardButton.onClick.AddListener(() => SetTargetDistance(threeYardDistance));
             
@@ -69,14 +67,12 @@ public class DistanceMenuManager : MonoBehaviour
         if (fifteenYardButton != null)
             fifteenYardButton.onClick.AddListener(() => SetTargetDistance(fifteenYardDistance));
             
-        // Set up keyboard input actions
         var keyboard = Keyboard.current;
         if (keyboard != null)
         {
             inputActions.UI.Enable();
         }
         
-        // Update button text to show keyboard shortcuts
         UpdateButtonLabels();
     }
     
@@ -96,7 +92,6 @@ public class DistanceMenuManager : MonoBehaviour
     
     void Update()
     {
-        // Check for keyboard input
         var keyboard = Keyboard.current;
         if (keyboard != null)
         {
@@ -135,7 +130,6 @@ public class DistanceMenuManager : MonoBehaviour
     
     private void HighlightButton(Button button)
     {
-        // Briefly highlight the button when activated via keyboard
         if (button != null)
         {
             var colors = button.colors;
@@ -150,7 +144,6 @@ public class DistanceMenuManager : MonoBehaviour
     
     private void ResetButtonColors()
     {
-        // Reset all button colors to normal
         if (threeYardButton != null)
         {
             var colors = threeYardButton.colors;
@@ -175,7 +168,6 @@ public class DistanceMenuManager : MonoBehaviour
     
     private void UpdateButtonLabels()
     {
-        // Update button text to show keyboard shortcuts
         if (threeYardText != null)
         {
             threeYardText.text = "3 yard (1)";
