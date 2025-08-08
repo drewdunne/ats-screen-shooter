@@ -582,7 +582,7 @@ MonoBehaviour:
   threeYardText: {fileID: 917849108}
   sevenYardText: {fileID: 944651361}
   fifteenYardText: {fileID: 1838480845}
-  b27Target: {fileID: 1397936761}
+  b27Target: {fileID: 779236018}
   threeYardDistance: 3
   sevenYardDistance: 7
   fifteenYardDistance: 15
@@ -7515,6 +7515,12 @@ MonoBehaviour:
   m_drawWorldDesignerRulers: 1
   m_drawWorldDesignerDensityViz: 0
   m_autoStampDensityVisualizationTimeStamp: 0
+--- !u!1 &779236018 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1508068512214563424, guid: dd2172799ca7b214cb10185e5cd33e59,
+    type: 3}
+  m_PrefabInstance: {fileID: 1473345373}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &823055429
 GameObject:
   m_ObjectHideFlags: 0
@@ -34121,18 +34127,6 @@ MonoBehaviour:
   - 500
   - 500
   - 500
---- !u!1 &1397936761 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4034390909185275052, guid: dd2172799ca7b214cb10185e5cd33e59,
-    type: 3}
-  m_PrefabInstance: {fileID: 1473345373}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1397936762 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4374923252112158230, guid: dd2172799ca7b214cb10185e5cd33e59,
-    type: 3}
-  m_PrefabInstance: {fileID: 1473345373}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1438593257
 GameObject:
   m_ObjectHideFlags: 0
@@ -34205,7 +34199,7 @@ PrefabInstance:
     - target: {fileID: 4374923252112158230, guid: dd2172799ca7b214cb10185e5cd33e59,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.67
       objectReference: {fileID: 0}
     - target: {fileID: 4374923252112158230, guid: dd2172799ca7b214cb10185e5cd33e59,
         type: 3}
@@ -38057,7 +38051,7 @@ PrefabInstance:
         type: 3}
       propertyPath: BulletHoleParent
       value: 
-      objectReference: {fileID: 1397936762}
+      objectReference: {fileID: 0}
     - target: {fileID: 3452661963917513011, guid: 97218c6c6b5a58e4cb094e4e276d2cfb,
         type: 3}
       propertyPath: m_Name
