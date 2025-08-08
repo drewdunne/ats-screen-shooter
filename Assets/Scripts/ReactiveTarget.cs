@@ -87,26 +87,37 @@ public class ReactiveTarget : MonoBehaviour
     
     private void UpdateVisuals()
     {
-        if (targetRenderer == null) return;
+        if (targetRenderer == null)
+        {
+            Debug.LogWarning($"No renderer found on {gameObject.name} - cannot update visuals");
+            return;
+        }
         
-        Material matToUse = inactiveMaterial;
+        Material matToUse = null;
         
         switch (currentState)
         {
             case ReactiveTargetState.Active:
                 matToUse = enemyMaterial;
+                Debug.Log($"{gameObject.name} set to ENEMY (red) - Material: {(enemyMaterial != null ? enemyMaterial.name : "NULL")}");
                 break;
             case ReactiveTargetState.Friendly:
                 matToUse = friendlyMaterial;
+                Debug.Log($"{gameObject.name} set to FRIENDLY (green) - Material: {(friendlyMaterial != null ? friendlyMaterial.name : "NULL")}");
                 break;
             case ReactiveTargetState.Inactive:
                 matToUse = inactiveMaterial;
+                Debug.Log($"{gameObject.name} set to INACTIVE (gray) - Material: {(inactiveMaterial != null ? inactiveMaterial.name : "NULL")}");
                 break;
         }
         
         if (matToUse != null)
         {
             targetRenderer.material = matToUse;
+        }
+        else
+        {
+            Debug.LogWarning($"No material assigned for state {currentState} on {gameObject.name}");
         }
     }
     
