@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 663232444366738389}
   - component: {fileID: 6574500554945301019}
+  - component: {fileID: -8999997021575035064}
   m_Layer: 0
   m_Name: Reactive Target Type A
   m_TagString: Untagged
@@ -56,6 +57,25 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &-8999997021575035064
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 180028297790228847}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4a2479a8dff2404b8f2b633cdf915e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  currentState: 0
+  targetAnimator: {fileID: 0}
+  targetCollider: {fileID: 8161770308900970030}
+  enemyMaterial: {fileID: 2100000, guid: babef22ed5337d44080d8d24838a9b37, type: 2}
+  friendlyMaterial: {fileID: 2100000, guid: a7473ac4e021cc44787c83472ebe0f8f, type: 2}
+  inactiveMaterial: {fileID: 2100000, guid: 51833feea9d4b0845ba58d300e513894, type: 2}
+  targetRenderer: {fileID: 4734648596642059375}
 --- !u!1 &185488639669989085
 GameObject:
   m_ObjectHideFlags: 0
@@ -249,6 +269,7 @@ GameObject:
   - component: {fileID: 1606802602976015430}
   - component: {fileID: 2814932413489733370}
   - component: {fileID: 4734648596642059375}
+  - component: {fileID: 8161770308900970030}
   m_Layer: 0
   m_Name: Body
   m_TagString: Untagged
@@ -324,6 +345,28 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
+--- !u!64 &8161770308900970030
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6739931476417905107}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 5
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 2959467708922500008, guid: 6eef47ec43a511a419a8629003b7f9ca, type: 3}
 --- !u!1 &7808270311060223232
 GameObject:
   m_ObjectHideFlags: 0

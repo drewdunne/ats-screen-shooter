@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ReactiveModeManager : MonoBehaviour
 {
     [Header("Target Configuration")]
-    public List<GameObject> ReactiveTargetList = new List<GameObject>();
+    public List<ReactiveTarget> ReactiveTargetList;
     
     [Header("Timing Configuration")]
     [Range(0.5f, 10f)]
@@ -29,43 +30,81 @@ public class ReactiveModeManager : MonoBehaviour
     [Range(2f, 20f)]
     public float WaitTimeForFriendlyMax = 5f;
     
-    private HashSet<GameObject> activeTargets = new HashSet<GameObject>();
     private Coroutine targetActivationCoroutine;
-    private List<Animator> targetAnimators = new List<Animator>();
+    private Dictionary<ReactiveTarget, Coroutine> friendlyKnockdownCoroutines = new Dictionary<ReactiveTarget, Coroutine>();
+    private bool isInitialized = false;
+    
+    void Awake()
+    {
+        // Store the Inspector-assigned list if it exists
+        List<ReactiveTarget> inspectorList = null;
+        if (ReactiveTargetList != null && ReactiveTargetList.Count > 0)
+        {
+            inspectorList = new List<ReactiveTarget>(ReactiveTargetList);
+            Debug.Log($"Found {inspectorList.Count} targets from Inspector");
+        }
+        
+        // Try to auto-populate from children
+        var childTargets = GetComponentsInChildren<ReactiveTarget>();
+        Debug.Log($"Found {childTargets.Length} ReactiveTargets in children");
+        
+        // Use Inspector list if available, otherwise use children
+        if (inspectorList != null && inspectorList.Count > 0)
+        {
+            ReactiveTargetList = inspectorList;
+            Debug.Log($"Using Inspector-assigned list with {ReactiveTargetList.Count} targets");
+        }
+        else if (childTargets.Length > 0)
+        {
+            ReactiveTargetList = new List<ReactiveTarget>(childTargets);
+            Debug.Log($"Using auto-detected children with {ReactiveTargetList.Count} targets");
+        }
+        else
+        {
+            ReactiveTargetList = new List<ReactiveTarget>();
+            Debug.LogWarning("No ReactiveTargets found - list is empty");
+        }
+    }
     
     void Start()
     {
+        Debug.Log($"[START] Initial list count: {ReactiveTargetList?.Count ?? -1}");
+        
+        // Check each target and log its status
+        if (ReactiveTargetList != null)
+        {
+            for (int i = 0; i < ReactiveTargetList.Count; i++)
+            {
+                if (ReactiveTargetList[i] == null)
+                {
+                    Debug.LogWarning($"Target at index {i} is null");
+                }
+                else
+                {
+                    Debug.Log($"Target {i}: {ReactiveTargetList[i].name} is valid");
+                }
+            }
+        }
+        
+        // Clean up the list - remove any null entries
+        int removedCount = ReactiveTargetList?.RemoveAll(t => t == null) ?? 0;
+        if (removedCount > 0)
+        {
+            Debug.LogWarning($"Removed {removedCount} null targets from list");
+        }
+        
         if (ReactiveTargetList == null || ReactiveTargetList.Count == 0)
         {
-            Debug.LogError($"ReactiveTargetList is not populated on {gameObject.name}!");
+            Debug.LogError($"No valid ReactiveTargets available for {gameObject.name}!");
             enabled = false;
             return;
         }
         
-        targetAnimators.Clear();
+        Debug.Log($"Starting with {ReactiveTargetList.Count} valid targets");
+        
         foreach (var target in ReactiveTargetList)
         {
-            if (target == null)
-            {
-                Debug.LogError($"Null target found in ReactiveTargetList on {gameObject.name}!");
-                enabled = false;
-                return;
-            }
-            
-            Animator animator = target.GetComponent<Animator>();
-            if (animator == null)
-            {
-                animator = target.GetComponentInChildren<Animator>();
-            }
-            
-            if (animator == null)
-            {
-                Debug.LogError($"No Animator found on target {target.name}!");
-                enabled = false;
-                return;
-            }
-            
-            targetAnimators.Add(animator);
+            target.OnTargetHit += HandleTargetHit;
         }
         
         if (WaitTimeForFriendlyMin > WaitTimeForFriendlyMax)
@@ -74,11 +113,36 @@ public class ReactiveModeManager : MonoBehaviour
             enabled = false;
             return;
         }
+        
+        isInitialized = true;
+        
+        // If we're already enabled, start the mode now that we're initialized
+        if (enabled && gameObject.activeInHierarchy)
+        {
+            StartReactiveMode();
+        }
+    }
+    
+    void OnDestroy()
+    {
+        if (ReactiveTargetList != null)
+        {
+            foreach (var target in ReactiveTargetList)
+            {
+                if (target != null)
+                {
+                    target.OnTargetHit -= HandleTargetHit;
+                }
+            }
+        }
     }
     
     void OnEnable()
     {
-        StartReactiveMode();
+        if (isInitialized)
+        {
+            StartReactiveMode();
+        }
     }
     
     void OnDisable()
@@ -88,12 +152,14 @@ public class ReactiveModeManager : MonoBehaviour
     
     private void StartReactiveMode()
     {
-        Debug.Log("Reactive Mode Started");
-        activeTargets.Clear();
+        if (!isInitialized || ReactiveTargetList == null) return;
         
-        foreach (var animator in targetAnimators)
+        Debug.Log("Reactive Mode Started");
+        
+        foreach (var target in ReactiveTargetList)
         {
-            animator.SetTrigger("KnockDown");
+            if (target != null)
+                target.Deactivate();
         }
         
         if (targetActivationCoroutine != null)
@@ -113,43 +179,62 @@ public class ReactiveModeManager : MonoBehaviour
             targetActivationCoroutine = null;
         }
         
-        activeTargets.Clear();
+        foreach (var coroutine in friendlyKnockdownCoroutines.Values)
+        {
+            if (coroutine != null)
+            {
+                StopCoroutine(coroutine);
+            }
+        }
+        friendlyKnockdownCoroutines.Clear();
+        
+        if (ReactiveTargetList != null && ReactiveTargetList.Count > 0)
+        {
+            foreach (var target in ReactiveTargetList)
+            {
+                if (target != null)
+                    target.Deactivate();
+            }
+        }
     }
     
     private IEnumerator TargetActivationLoop()
     {
+        Debug.Log("TargetActivationLoop started, waiting 1 second...");
         yield return new WaitForSeconds(1f);
+        
+        Debug.Log($"Starting activation loop. Total targets: {ReactiveTargetList.Count}");
         
         while (enabled)
         {
-            if (activeTargets.Count < MaxActiveTargets)
+            int activeCount = ReactiveTargetList.Count(t => t.IsActive);
+            Debug.Log($"Active targets: {activeCount}/{MaxActiveTargets}");
+            
+            if (activeCount < MaxActiveTargets)
             {
-                if (Random.value < ProbabilityOfActivate)
+                float activationRoll = Random.value;
+                Debug.Log($"Activation roll: {activationRoll} vs probability: {ProbabilityOfActivate}");
+                
+                if (activationRoll < ProbabilityOfActivate)
                 {
-                    List<GameObject> inactiveTargets = new List<GameObject>();
-                    for (int i = 0; i < ReactiveTargetList.Count; i++)
-                    {
-                        if (!activeTargets.Contains(ReactiveTargetList[i]))
-                        {
-                            inactiveTargets.Add(ReactiveTargetList[i]);
-                        }
-                    }
+                    var inactiveTargets = ReactiveTargetList.Where(t => !t.IsActive).ToList();
+                    Debug.Log($"Found {inactiveTargets.Count} inactive targets");
                     
                     if (inactiveTargets.Count > 0)
                     {
                         int randomIndex = Random.Range(0, inactiveTargets.Count);
-                        GameObject targetToActivate = inactiveTargets[randomIndex];
-                        int targetIndex = ReactiveTargetList.IndexOf(targetToActivate);
-                        
-                        targetAnimators[targetIndex].SetTrigger("StandUp");
-                        activeTargets.Add(targetToActivate);
+                        ReactiveTarget targetToActivate = inactiveTargets[randomIndex];
                         
                         bool isFriendly = Random.value < ProbabilityFriendlyTarget;
+                        
+                        Debug.Log($"Attempting to activate target: {targetToActivate.name} as {(isFriendly ? "Friendly" : "Enemy")}");
+                        targetToActivate.Activate(isFriendly);
                         
                         if (isFriendly)
                         {
                             float friendlyWaitTime = Random.Range(WaitTimeForFriendlyMin, WaitTimeForFriendlyMax);
-                            StartCoroutine(KnockDownTargetAfterDelay(targetToActivate, targetIndex, friendlyWaitTime));
+                            var coroutine = StartCoroutine(KnockDownFriendlyAfterDelay(targetToActivate, friendlyWaitTime));
+                            friendlyKnockdownCoroutines[targetToActivate] = coroutine;
                         }
                         
                         Debug.Log($"Activated target: {targetToActivate.name} - {(isFriendly ? "Friendly" : "Enemy")}");
@@ -161,28 +246,37 @@ public class ReactiveModeManager : MonoBehaviour
         }
     }
     
-    private IEnumerator KnockDownTargetAfterDelay(GameObject target, int targetIndex, float delay)
+    private IEnumerator KnockDownFriendlyAfterDelay(ReactiveTarget target, float delay)
     {
         yield return new WaitForSeconds(delay);
         
-        if (activeTargets.Contains(target))
+        if (target.IsActive && target.IsFriendly)
         {
-            targetAnimators[targetIndex].SetTrigger("KnockDown");
-            activeTargets.Remove(target);
-            Debug.Log($"Friendly target knocked down: {target.name}");
+            target.Deactivate();
+            Debug.Log($"Friendly target auto-deactivated: {target.name}");
         }
+        
+        friendlyKnockdownCoroutines.Remove(target);
     }
     
-    public void OnTargetHit(GameObject target)
+    private void HandleTargetHit(ReactiveTarget target)
     {
-        if (activeTargets.Contains(target))
+        if (friendlyKnockdownCoroutines.ContainsKey(target))
         {
-            activeTargets.Remove(target);
-            int targetIndex = ReactiveTargetList.IndexOf(target);
-            if (targetIndex >= 0)
+            if (friendlyKnockdownCoroutines[target] != null)
             {
-                targetAnimators[targetIndex].SetTrigger("KnockDown");
+                StopCoroutine(friendlyKnockdownCoroutines[target]);
             }
+            friendlyKnockdownCoroutines.Remove(target);
+        }
+        
+        if (target.IsFriendly)
+        {
+            Debug.LogWarning($"Player shot a friendly target: {target.name}!");
+        }
+        else
+        {
+            Debug.Log($"Player successfully hit enemy target: {target.name}");
         }
     }
 }
