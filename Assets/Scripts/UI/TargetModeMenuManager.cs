@@ -13,10 +13,22 @@ public class TargetModeMenuManager : MonoBehaviour
     public Button qualificationButton;
     public Button reactiveButton;
     
+    [Header("App Mode Manager")]
+    public AppModeManager appModeManager;
+    
     private bool isMenuOpen = true;
     
     void Start()
     {
+        if (appModeManager == null)
+        {
+            appModeManager = FindObjectOfType<AppModeManager>();
+            if (appModeManager == null)
+            {
+                Debug.LogError("AppModeManager not found! Please assign it in the inspector or ensure it exists in the scene.");
+            }
+        }
+        
         if (toggleButton != null)
         {
             toggleButton.onClick.AddListener(ToggleMenu);
@@ -87,15 +99,21 @@ public class TargetModeMenuManager : MonoBehaviour
     {
         Debug.Log($"Target mode selected: {mode}");
         
-        // Add your mode-specific logic here
-        switch (mode)
+        if (appModeManager != null)
         {
-            case "Qualification":
-                // Handle qualification mode
-                break;
-            case "Reactive":
-                // Handle reactive mode
-                break;
+            switch (mode)
+            {
+                case "Qualification":
+                    appModeManager.OnQualificationModeSelected();
+                    break;
+                case "Reactive":
+                    appModeManager.OnReactiveModeSelected();
+                    break;
+            }
+        }
+        else
+        {
+            Debug.LogError("AppModeManager is not assigned!");
         }
     }
 }
