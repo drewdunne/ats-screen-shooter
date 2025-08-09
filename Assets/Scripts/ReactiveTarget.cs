@@ -16,13 +16,21 @@ public class ReactiveTarget : MonoBehaviour
     [Header("Components")]
     [SerializeField] private Collider targetCollider;
     
-    [Header("Visual Feedback")]
-    [SerializeField] private Material enemyMaterial;
-    [SerializeField] private Material friendlyMaterial;
-    [SerializeField] private Material inactiveMaterial;
+    [Header("Day Materials")]
+    [SerializeField] private Material enemyMaterialDay;
+    [SerializeField] private Material friendlyMaterialDay;
+    [SerializeField] private Material inactiveMaterialDay;
+    
+    [Header("Night Materials")]
+    [SerializeField] private Material enemyMaterialNight;
+    [SerializeField] private Material friendlyMaterialNight;
+    [SerializeField] private Material inactiveMaterialNight;
+    
+    [Header("Components")]
     [SerializeField] private Renderer targetRenderer;
     
     private Animator targetAnimator;
+    private LightingModeManager lightingModeManager;
     
     public ReactiveTargetState CurrentState => currentState;
     public bool IsActive => currentState != ReactiveTargetState.Inactive;
@@ -48,6 +56,8 @@ public class ReactiveTarget : MonoBehaviour
         {
             targetRenderer = GetComponentInChildren<Renderer>();
         }
+        
+        lightingModeManager = FindObjectOfType<LightingModeManager>();
     }
     
     void Start()
@@ -62,7 +72,7 @@ public class ReactiveTarget : MonoBehaviour
         ReactiveTargetState previousState = currentState;
         currentState = newState;
         
-        UpdateVisuals();
+        UpdateMaterial();
         UpdateCollider();
         UpdateAnimation(previousState, newState);
         
@@ -85,29 +95,36 @@ public class ReactiveTarget : MonoBehaviour
         }
     }
     
-    private void UpdateVisuals()
+    private void UpdateMaterial()
     {
         if (targetRenderer == null)
         {
-            Debug.LogWarning($"No renderer found on {gameObject.name} - cannot update visuals");
+            Debug.LogWarning($"No renderer found on {gameObject.name} - cannot update material");
             return;
         }
         
+        bool isDarkMode = false;
+        if (lightingModeManager != null)
+        {
+            isDarkMode = lightingModeManager.GetCurrentMode() == LightingModeManager.LightingMode.Dark;
+        }
+        
         Material matToUse = null;
+        string modeText = isDarkMode ? "NIGHT" : "DAY";
         
         switch (currentState)
         {
             case ReactiveTargetState.Active:
-                matToUse = enemyMaterial;
-                Debug.Log($"{gameObject.name} set to ENEMY (red) - Material: {(enemyMaterial != null ? enemyMaterial.name : "NULL")}");
+                matToUse = isDarkMode ? enemyMaterialNight : enemyMaterialDay;
+                Debug.Log($"{gameObject.name} set to ENEMY ({modeText}) - Material: {(matToUse != null ? matToUse.name : "NULL")}");
                 break;
             case ReactiveTargetState.Friendly:
-                matToUse = friendlyMaterial;
-                Debug.Log($"{gameObject.name} set to FRIENDLY (green) - Material: {(friendlyMaterial != null ? friendlyMaterial.name : "NULL")}");
+                matToUse = isDarkMode ? friendlyMaterialNight : friendlyMaterialDay;
+                Debug.Log($"{gameObject.name} set to FRIENDLY ({modeText}) - Material: {(matToUse != null ? matToUse.name : "NULL")}");
                 break;
             case ReactiveTargetState.Inactive:
-                matToUse = inactiveMaterial;
-                Debug.Log($"{gameObject.name} set to INACTIVE (gray) - Material: {(inactiveMaterial != null ? inactiveMaterial.name : "NULL")}");
+                matToUse = isDarkMode ? inactiveMaterialNight : inactiveMaterialDay;
+                Debug.Log($"{gameObject.name} set to INACTIVE ({modeText}) - Material: {(matToUse != null ? matToUse.name : "NULL")}");
                 break;
         }
         
@@ -117,7 +134,7 @@ public class ReactiveTarget : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning($"No material assigned for state {currentState} on {gameObject.name}");
+            Debug.LogWarning($"No {modeText} material assigned for state {currentState} on {gameObject.name}");
         }
     }
     
@@ -157,5 +174,10 @@ public class ReactiveTarget : MonoBehaviour
     public void Deactivate()
     {
         SetState(ReactiveTargetState.Inactive);
+    }
+    
+    public void RefreshMaterial()
+    {
+        UpdateMaterial();
     }
 }

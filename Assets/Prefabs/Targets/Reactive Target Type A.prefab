@@ -70,11 +70,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   currentState: 0
-  targetAnimator: {fileID: 0}
   targetCollider: {fileID: 8161770308900970030}
-  enemyMaterial: {fileID: 2100000, guid: babef22ed5337d44080d8d24838a9b37, type: 2}
-  friendlyMaterial: {fileID: 2100000, guid: a7473ac4e021cc44787c83472ebe0f8f, type: 2}
-  inactiveMaterial: {fileID: 2100000, guid: 51833feea9d4b0845ba58d300e513894, type: 2}
+  enemyMaterialDay: {fileID: 2100000, guid: babef22ed5337d44080d8d24838a9b37, type: 2}
+  friendlyMaterialDay: {fileID: 2100000, guid: a7473ac4e021cc44787c83472ebe0f8f, type: 2}
+  inactiveMaterialDay: {fileID: 2100000, guid: 51833feea9d4b0845ba58d300e513894, type: 2}
+  enemyMaterialNight: {fileID: 2100000, guid: c2fe6c95c737cdf498cfe0d6ae5a6612, type: 2}
+  friendlyMaterialNight: {fileID: 2100000, guid: 757adcd178658c44895d9de9558a7528,
+    type: 2}
+  inactiveMaterialNight: {fileID: 2100000, guid: 9a3cebcccb88fba41a99f66bec18a5c9,
+    type: 2}
   targetRenderer: {fileID: 4734648596642059375}
 --- !u!1 &185488639669989085
 GameObject:
