@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 public enum ReactiveTargetState
@@ -12,6 +13,11 @@ public class ReactiveTarget : MonoBehaviour
 {
     [Header("State")]
     [SerializeField] private ReactiveTargetState currentState = ReactiveTargetState.Inactive;
+    
+    [Header("Hit Configuration")]
+    [SerializeField] private int currentHitPoints = 1;
+    [SerializeField] private int requiredHitsToDown = 1;
+    [SerializeField] private float colorChangeDelay = 0.5f;
     
     [Header("Components")]
     [SerializeField] private Collider targetCollider;
@@ -31,12 +37,16 @@ public class ReactiveTarget : MonoBehaviour
     
     private Animator targetAnimator;
     private LightingModeManager lightingModeManager;
+    private Coroutine delayedMaterialUpdateCoroutine;
     
     public ReactiveTargetState CurrentState => currentState;
     public bool IsActive => currentState != ReactiveTargetState.Inactive;
     public bool IsFriendly => currentState == ReactiveTargetState.Friendly;
+    public int CurrentHitPoints => currentHitPoints;
+    public int RequiredHitsToDown => requiredHitsToDown;
     
     public event Action<ReactiveTarget> OnTargetHit;
+    public event Action<ReactiveTarget> OnTargetDowned;
     public event Action<ReactiveTarget> OnStateChanged;
     
     void Awake()
@@ -65,18 +75,44 @@ public class ReactiveTarget : MonoBehaviour
         SetState(ReactiveTargetState.Inactive);
     }
     
-    public void SetState(ReactiveTargetState newState)
+    public void SetState(ReactiveTargetState newState, bool immediateColorChange = true)
     {
         if (currentState == newState) return;
         
         ReactiveTargetState previousState = currentState;
         currentState = newState;
         
-        UpdateMaterial();
+        // Reset hit points when activating
+        if (newState != ReactiveTargetState.Inactive && previousState == ReactiveTargetState.Inactive)
+        {
+            currentHitPoints = requiredHitsToDown;
+        }
+        
+        if (immediateColorChange)
+        {
+            UpdateMaterial();
+        }
+        else
+        {
+            // Cancel any existing delayed update
+            if (delayedMaterialUpdateCoroutine != null)
+            {
+                StopCoroutine(delayedMaterialUpdateCoroutine);
+            }
+            delayedMaterialUpdateCoroutine = StartCoroutine(DelayedMaterialUpdate());
+        }
+        
         UpdateCollider();
         UpdateAnimation(previousState, newState);
         
         OnStateChanged?.Invoke(this);
+    }
+    
+    private IEnumerator DelayedMaterialUpdate()
+    {
+        yield return new WaitForSeconds(colorChangeDelay);
+        UpdateMaterial();
+        delayedMaterialUpdateCoroutine = null;
     }
     
     private void UpdateAnimation(ReactiveTargetState from, ReactiveTargetState to)
@@ -154,21 +190,51 @@ public class ReactiveTarget : MonoBehaviour
             return;
         }
         
-        Debug.Log($"Target {gameObject.name} hit! Was {(IsFriendly ? "FRIENDLY" : "ENEMY")}");
+        // Process the hit
+        ProcessHit();
+    }
+    
+    private void ProcessHit()
+    {
+        // Decrement hit points
+        currentHitPoints--;
         
+        Debug.Log($"Target {gameObject.name} hit! Was {(IsFriendly ? "FRIENDLY" : "ENEMY")} - Hits remaining: {currentHitPoints}");
+        
+        // Fire hit event
         OnTargetHit?.Invoke(this);
         
-        SetState(ReactiveTargetState.Inactive);
-        
-        if (IsFriendly)
+        // Check if target should go down
+        if (currentHitPoints <= 0)
         {
-            Debug.LogWarning("Friendly target was shot!");
+            // Target is downed
+            Debug.Log($"Target {gameObject.name} is going down!");
+            OnTargetDowned?.Invoke(this);
+            
+            // Change state with delayed color change
+            SetState(ReactiveTargetState.Inactive, false);
+            
+            if (IsFriendly)
+            {
+                Debug.LogWarning("Friendly target was shot down!");
+            }
+        }
+        else
+        {
+            // Target still standing but took a hit - could add visual feedback here
+            Debug.Log($"Target {gameObject.name} still standing with {currentHitPoints} hits remaining");
         }
     }
     
     public void Activate(bool asFriendly = false)
     {
         SetState(asFriendly ? ReactiveTargetState.Friendly : ReactiveTargetState.Active);
+    }
+    
+    public void SetRequiredHits(int hits)
+    {
+        requiredHitsToDown = Mathf.Max(1, hits);
+        currentHitPoints = requiredHitsToDown;
     }
     
     public void Deactivate()

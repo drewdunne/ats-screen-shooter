@@ -30,6 +30,13 @@ public class ReactiveModeManager : MonoBehaviour
     [Range(2f, 20f)]
     public float WaitTimeForFriendlyMax = 5f;
     
+    [Header("Enemy Hit Configuration")]
+    [Range(1, 10)]
+    public int MinHitsToDownEnemy = 1;
+    
+    [Range(1, 10)]
+    public int MaxHitsToDownEnemy = 3;
+    
     private Coroutine targetActivationCoroutine;
     private Dictionary<ReactiveTarget, Coroutine> friendlyKnockdownCoroutines = new Dictionary<ReactiveTarget, Coroutine>();
     private bool isInitialized = false;
@@ -105,6 +112,7 @@ public class ReactiveModeManager : MonoBehaviour
         foreach (var target in ReactiveTargetList)
         {
             target.OnTargetHit += HandleTargetHit;
+            target.OnTargetDowned += HandleTargetDowned;
         }
         
         if (WaitTimeForFriendlyMin > WaitTimeForFriendlyMax)
@@ -132,6 +140,7 @@ public class ReactiveModeManager : MonoBehaviour
                 if (target != null)
                 {
                     target.OnTargetHit -= HandleTargetHit;
+                    target.OnTargetDowned -= HandleTargetDowned;
                 }
             }
         }
@@ -227,6 +236,19 @@ public class ReactiveModeManager : MonoBehaviour
                         
                         bool isFriendly = Random.value < ProbabilityFriendlyTarget;
                         
+                        // Set required hits for enemy targets
+                        if (!isFriendly)
+                        {
+                            int requiredHits = Random.Range(MinHitsToDownEnemy, MaxHitsToDownEnemy + 1);
+                            targetToActivate.SetRequiredHits(requiredHits);
+                            Debug.Log($"Enemy target {targetToActivate.name} will require {requiredHits} hits to down");
+                        }
+                        else
+                        {
+                            // Friendly targets always go down in one hit
+                            targetToActivate.SetRequiredHits(1);
+                        }
+                        
                         Debug.Log($"Attempting to activate target: {targetToActivate.name} as {(isFriendly ? "Friendly" : "Enemy")}");
                         targetToActivate.Activate(isFriendly);
                         
@@ -261,6 +283,20 @@ public class ReactiveModeManager : MonoBehaviour
     
     private void HandleTargetHit(ReactiveTarget target)
     {
+        // Called for every hit, whether or not it downs the target
+        if (target.IsFriendly)
+        {
+            Debug.LogWarning($"Player shot a friendly target: {target.name}! Hits remaining: {target.CurrentHitPoints}");
+        }
+        else
+        {
+            Debug.Log($"Player successfully hit enemy target: {target.name}. Hits remaining: {target.CurrentHitPoints}");
+        }
+    }
+    
+    private void HandleTargetDowned(ReactiveTarget target)
+    {
+        // Called only when target is actually downed
         if (friendlyKnockdownCoroutines.ContainsKey(target))
         {
             if (friendlyKnockdownCoroutines[target] != null)
@@ -272,11 +308,11 @@ public class ReactiveModeManager : MonoBehaviour
         
         if (target.IsFriendly)
         {
-            Debug.LogWarning($"Player shot a friendly target: {target.name}!");
+            Debug.LogWarning($"Player downed a friendly target: {target.name}!");
         }
         else
         {
-            Debug.Log($"Player successfully hit enemy target: {target.name}");
+            Debug.Log($"Player successfully downed enemy target: {target.name}");
         }
     }
 }
