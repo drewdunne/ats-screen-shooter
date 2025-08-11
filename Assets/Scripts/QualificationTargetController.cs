@@ -77,10 +77,6 @@ public class QualificationTargetController : MonoBehaviour
         
         if (inputHandlers != null)
         {
-            if (shouldLog && !inputHandlers.IsTracking)
-            {
-                Debug.LogWarning($"QualificationTarget: Waiting for tracking... IsTracking={inputHandlers.IsTracking}, Translation={inputHandlers.Translation}");
-            }
             
             if (inputHandlers.IsTracking)
             {
@@ -97,16 +93,11 @@ public class QualificationTargetController : MonoBehaviour
                     
                     lastTrackedDistance = currentDistance;
                     
-                    Debug.Log($"QualificationTarget: Distance changed! Delta={deltaDistance:F3}, Adjustment={zAdjustment:F3}, New Z={targetPosition.z:F3}");
                 }
                 
                 Vector3 smoothedPosition = Vector3.SmoothDamp(transform.position, targetPosition, ref currentVelocity, smoothingFactor);
                 transform.position = smoothedPosition;
             }
-        }
-        else if (shouldLog)
-        {
-            Debug.LogError("QualificationTarget: InputHandlers is NULL!");
         }
     }
     
@@ -126,7 +117,6 @@ public class QualificationTargetController : MonoBehaviour
     public void SetResponsiveDistanceEnabled(bool enabled)
     {
         responsiveDistanceEnabled = enabled;
-        Debug.Log($"QualificationTarget: Responsive Distance Feature {(enabled ? "Enabled" : "Disabled")}");
         
         if (!enabled)
         {
@@ -142,7 +132,6 @@ public class QualificationTargetController : MonoBehaviour
     public void SetDistanceScalingRatio(float ratio)
     {
         distanceScalingRatio = Mathf.Max(0.1f, ratio);
-        Debug.Log($"QualificationTarget: Distance Scaling Ratio set to {distanceScalingRatio:F2}");
     }
     
     public float GetDistanceScalingRatio()
@@ -155,6 +144,5 @@ public class QualificationTargetController : MonoBehaviour
         targetPosition.z = baseZPosition;
         transform.position = targetPosition;
         lastTrackedDistance = 0f;
-        Debug.Log($"QualificationTarget: Reset to base Z position {baseZPosition}");
     }
 }
