@@ -14,7 +14,7 @@ public class QualificationTargetController : MonoBehaviour
     
     [SerializeField]
     [Tooltip("The base Z position when tracking distance is zero")]
-    private float baseZPosition = 3.0f;
+    private float baseZPosition = 7.0f;
     
     [SerializeField]
     [Tooltip("Minimum Z position (closest to camera)")]

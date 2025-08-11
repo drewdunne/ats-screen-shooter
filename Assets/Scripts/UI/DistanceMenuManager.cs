@@ -24,7 +24,7 @@ public class DistanceMenuManager : MonoBehaviour
     private QualificationTargetController targetController;
     
     [Header("Distance Settings")]
-    [SerializeField] private float threeYardDistance = 3f;
+    [SerializeField] private float threeYardDistance = 5f;
     [SerializeField] private float sevenYardDistance = 7f;
     [SerializeField] private float fifteenYardDistance = 15f;
     
@@ -64,6 +64,14 @@ public class DistanceMenuManager : MonoBehaviour
             {
                 targetController = b27Target.AddComponent<QualificationTargetController>();
                 Debug.Log("DistanceMenuManager: Added QualificationTargetController to target");
+            }
+            
+            // Fix the MeshCollider if it's missing its mesh
+            QualificationTargetMeshFix meshFix = b27Target.GetComponent<QualificationTargetMeshFix>();
+            if (meshFix == null)
+            {
+                meshFix = b27Target.AddComponent<QualificationTargetMeshFix>();
+                Debug.Log("DistanceMenuManager: Added QualificationTargetMeshFix to ensure MeshCollider has mesh");
             }
         }
         
