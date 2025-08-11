@@ -2280,7 +2280,7 @@ MonoBehaviour:
   normalModeAmbientColor: {r: 1, g: 1, b: 1, a: 1}
   darkModeLightIntensityMultiplier: 0.025
   flashlightController: {fileID: 1181535446}
-  b27TargetMaterial: {fileID: 2100000, guid: 5e48598057e2b704888d836aadf571ca, type: 2}
+  qualificationModeManager: {fileID: 0}
 --- !u!4 &401994587
 Transform:
   m_ObjectHideFlags: 0
